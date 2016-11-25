@@ -1,2 +1,3 @@
 *
-!./GeometryFriendsAgents/*.cs
+!.gitignore
+!GeometryFriendsAgents/*.cs
