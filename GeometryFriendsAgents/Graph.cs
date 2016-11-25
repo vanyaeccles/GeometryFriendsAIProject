@@ -9,24 +9,24 @@ namespace GeometryFriendsAgents
 {
     class Graph
     {
-        private List<String> nodeList;
+        private List<Node> nodeList;
 
         Graph()
         {
-            nodeList = new List<String>();
+            nodeList = new List<Node>();
         }
 
         Graph(ObstacleRepresentation oI, ObstacleRepresentation coI, CollectibleRepresentation cI, Rectangle rect)
         {
-            nodeList = new List<String>();
+            nodeList = new List<Node>();
         }
 
-        void addNode(ref String node)
+        void addNode(ref Node node)
         {
             nodeList.Add(node);
         }
 
-        List<String> getList()
+        List<Node> getList()
         {
             return nodeList;
         }
