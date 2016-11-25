@@ -1,3 +1,4 @@
 GeometryFriendsAgents/*/
 *.csproj
 *.sln
+*.suo
