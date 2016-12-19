@@ -1,0 +1,5 @@
+U:\GeoFriends\ai-geometry-friends\Agents-Pack-29-04-2016\Source Code\SubGoalAStarAgents\bin\Debug\SubGoalAStarAgents.dll
+U:\GeoFriends\ai-geometry-friends\Agents-Pack-29-04-2016\Source Code\SubGoalAStarAgents\bin\Debug\SubGoalAStarAgents.pdb
+U:\GeoFriends\ai-geometry-friends\Agents-Pack-29-04-2016\Source Code\SubGoalAStarAgents\obj\Debug\SubGoalAStarAgents.csprojResolveAssemblyReference.cache
+U:\GeoFriends\ai-geometry-friends\Agents-Pack-29-04-2016\Source Code\SubGoalAStarAgents\obj\Debug\SubGoalAStarAgents.dll
+U:\GeoFriends\ai-geometry-friends\Agents-Pack-29-04-2016\Source Code\SubGoalAStarAgents\obj\Debug\SubGoalAStarAgents.pdb
