@@ -42,6 +42,7 @@ namespace GeometryFriendsAgents
 
         Graph arena;
         Queue<Node> solution;
+        Solver solver;
         public CircleAgent()
         {
             //setup for action updates
@@ -71,8 +72,8 @@ namespace GeometryFriendsAgents
             collectiblesInfo = colI;
             this.area = area;
 
-            arena = new Graph(oI, colI, cI, area);
-            solution = Solver.solve(arena);
+            arena = new Graph(oI, rPI, cPI, colI, area);
+            solution = solver.solve(arena, cI);
 
         }
 

@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GeometryFriends.AI.Perceptions.Information;
+
 namespace GeometryFriendsAgents
 {
     class Solver
     {
-        public static Queue<Node> solve(Graph initialGraph)
+        public Queue<Node> solve(Graph initialGraph, CircleRepresentation cI)
         {
+            ArrayList layout = initialGraph.getNodes();
             Queue<Node> queue = new Queue<Node>();
             return queue;
         }
