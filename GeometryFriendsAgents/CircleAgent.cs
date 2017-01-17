@@ -31,6 +31,17 @@ namespace GeometryFriendsAgents
         Rectangle area;
         double timeLimit;
 
+        //Sensors Information
+        private int[] numbersInfo;
+        private float[] rectangleInfo;
+        private float[] circleInfo;
+        private float[] obstaclesInfo;
+        private float[] rectanglePlatformsInfo;
+        private float[] circlePlatformsInfo;
+        public static float[] collectiblesInfo;
+
+        bool firstUpdate;
+
         //Obstacle and open space
         public static int fullHeight = 800;
         public static int fullWidth = 1280;
@@ -47,6 +58,7 @@ namespace GeometryFriendsAgents
 
         enum Direction { Right, RightDown, Down, LeftDown, Left, LeftUp, Up, RightUp };
 
+        int moveStep;
         Driver2 driver;
 
         public static int[,] directDistanceMap;
@@ -74,6 +86,8 @@ namespace GeometryFriendsAgents
 
         }
 
+
+        /*
         public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
         {
             this.area = area;
@@ -93,7 +107,226 @@ namespace GeometryFriendsAgents
             //TODO - MAKE NEW DRIVER WITH DIFFERENT ACTUATORS
             driver = new Driver2(nodes, adjacencyMatrix, directionMap, route);
             Log.LogInformation("Create driver end");
+        }*/
+
+        public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
+        {
+            moveStep = 0;
+            //convert to old way in order to maintain compatibility
+            DeprecatedSetup(
+                nI.ToArray(),
+                rI.ToArray(),
+                cI.ToArray(),
+                ObstacleRepresentation.RepresentationArrayToFloatArray(oI),
+                ObstacleRepresentation.RepresentationArrayToFloatArray(rPI),
+                ObstacleRepresentation.RepresentationArrayToFloatArray(cPI),
+                CollectibleRepresentation.RepresentationArrayToFloatArray(colI),
+                area,
+                timeLimit);
         }
+
+        public void DeprecatedSetup(int[] nI, float[] sI, float[] cI, float[] oI, float[] sPI, float[] cPI, float[] colI, Rectangle area, double timeLimit)
+        {
+            // Time limit is the time limit of the level - if negative then there is no time constrains
+            this.area = area;
+            int temp;
+
+            // numbersInfo[] Description
+            //
+            // Index - Information
+            //
+            //   0   - Number of Obstacles
+            //   1   - Number of Rectangle Platforms
+            //   2   - Number of Circle Platforms
+            //   3   - Number of Collectibles
+
+            numbersInfo = new int[4];
+            int i;
+            for (i = 0; i < nI.Length; i++)
+            {
+                numbersInfo[i] = nI[i];
+            }
+
+            nCollectiblesLeft = nI[3];
+
+            // rectangleInfo[] Description
+            //
+            // Index - Information
+            //
+            //   0   - Rectangle X Position
+            //   1   - Rectangle Y Position
+            //   2   - Rectangle X Velocity
+            //   3   - Rectangle Y Velocity
+            //   4   - Rectangle Height
+
+            rectangleInfo = new float[5];
+
+            rectangleInfo[0] = sI[0];
+            rectangleInfo[1] = sI[1];
+            rectangleInfo[2] = sI[2];
+            rectangleInfo[3] = sI[3];
+            rectangleInfo[4] = sI[4];
+
+            // circleInfo[] Description
+            //
+            // Index - Information
+            //
+            //   0  - Circle X Position
+            //   1  - Circle Y Position
+            //   2  - Circle X Velocity
+            //   3  - Circle Y Velocity
+            //   4  - Circle Radius
+
+            circleInfo = new float[5];
+
+            circleInfo[0] = cI[0];
+            circleInfo[1] = cI[1];
+            circleInfo[2] = cI[2];
+            circleInfo[3] = cI[3];
+            circleInfo[4] = cI[4];
+
+
+            // Obstacles and Platforms Info Description
+            //
+            //  X = Center X Coordinate
+            //  Y = Center Y Coordinate
+            //
+            //  H = Platform Height
+            //  W = Platform Width
+            //
+            //  Position (X=0,Y=0) = Left Superior Corner
+
+            // obstaclesInfo[] Description
+            //
+            // Index - Information
+            //
+            // If (Number of Obstacles > 0)
+            //  [0 ; (NumObstacles * 4) - 1]      - Obstacles' info [X,Y,H,W]
+            // Else
+            //   0                                - 0
+            //   1                                - 0
+            //   2                                - 0
+            //   3                                - 0
+
+            if (numbersInfo[0] > 0)
+                obstaclesInfo = new float[numbersInfo[0] * 4];
+            else obstaclesInfo = new float[4];
+
+            temp = 1;
+            if (nI[0] > 0)
+            {
+                while (temp <= nI[0])
+                {
+                    obstaclesInfo[(temp * 4) - 4] = oI[(temp * 4) - 4];
+                    obstaclesInfo[(temp * 4) - 3] = oI[(temp * 4) - 3];
+                    obstaclesInfo[(temp * 4) - 2] = oI[(temp * 4) - 2];
+                    obstaclesInfo[(temp * 4) - 1] = oI[(temp * 4) - 1];
+                    temp++;
+                }
+            }
+            else
+            {
+                obstaclesInfo[0] = oI[0];
+                obstaclesInfo[1] = oI[1];
+                obstaclesInfo[2] = oI[2];
+                obstaclesInfo[3] = oI[3];
+            }
+
+            // rectanglePlatformsInfo[] Description
+            //
+            // Index - Information
+            //
+            // If (Number of Rectangle Platforms > 0)
+            //  [0; (numRectanglePlatforms * 4) - 1]   - Rectangle Platforms' info [X,Y,H,W]
+            // Else
+            //   0                                  - 0
+            //   1                                  - 0
+            //   2                                  - 0
+            //   3                                  - 0
+
+            if (numbersInfo[1] > 0)
+                rectanglePlatformsInfo = new float[numbersInfo[1] * 4];
+            else
+                rectanglePlatformsInfo = new float[4];
+
+            temp = 1;
+            if (nI[1] > 0)
+            {
+                while (temp <= nI[1])
+                {
+                    rectanglePlatformsInfo[(temp * 4) - 4] = sPI[(temp * 4) - 4];
+                    rectanglePlatformsInfo[(temp * 4) - 3] = sPI[(temp * 4) - 3];
+                    rectanglePlatformsInfo[(temp * 4) - 2] = sPI[(temp * 4) - 2];
+                    rectanglePlatformsInfo[(temp * 4) - 1] = sPI[(temp * 4) - 1];
+                    temp++;
+                }
+            }
+            else
+            {
+                rectanglePlatformsInfo[0] = sPI[0];
+                rectanglePlatformsInfo[1] = sPI[1];
+                rectanglePlatformsInfo[2] = sPI[2];
+                rectanglePlatformsInfo[3] = sPI[3];
+            }
+
+            // circlePlatformsInfo[] Description
+            //
+            // Index - Information
+            //
+            // If (Number of Circle Platforms > 0)
+            //  [0; (numCirclePlatforms * 4) - 1]   - Circle Platforms' info [X,Y,H,W]
+            // Else
+            //   0                                  - 0
+            //   1                                  - 0
+            //   2                                  - 0
+            //   3                                  - 0
+
+            if (numbersInfo[2] > 0)
+                circlePlatformsInfo = new float[numbersInfo[2] * 4];
+            else
+                circlePlatformsInfo = new float[4];
+
+            temp = 1;
+            if (nI[2] > 0)
+            {
+                while (temp <= nI[2])
+                {
+                    circlePlatformsInfo[(temp * 4) - 4] = cPI[(temp * 4) - 4];
+                    circlePlatformsInfo[(temp * 4) - 3] = cPI[(temp * 4) - 3];
+                    circlePlatformsInfo[(temp * 4) - 2] = cPI[(temp * 4) - 2];
+                    circlePlatformsInfo[(temp * 4) - 1] = cPI[(temp * 4) - 1];
+                    temp++;
+                }
+            }
+            else
+            {
+                circlePlatformsInfo[0] = cPI[0];
+                circlePlatformsInfo[1] = cPI[1];
+                circlePlatformsInfo[2] = cPI[2];
+                circlePlatformsInfo[3] = cPI[3];
+            }
+
+            //Collectibles' To Catch Coordinates (X,Y)
+            //
+            //  [0; (numCollectibles * 2) - 1]   - Collectibles' Coordinates (X,Y)
+
+            collectiblesInfo = new float[numbersInfo[3] * 2];
+
+            temp = 1;
+            while (temp <= nI[3])
+            {
+
+                collectiblesInfo[(temp * 2) - 2] = colI[(temp * 2) - 2];
+                collectiblesInfo[(temp * 2) - 1] = colI[(temp * 2) - 1];
+
+                temp++;
+            }
+
+            //DebugSensorsInfo();
+
+            firstUpdate = true;
+        }
+
 
         private void setColI(CollectibleRepresentation[] inputColI)
         {
@@ -119,6 +352,63 @@ namespace GeometryFriendsAgents
 
         public override void Update(TimeSpan elapsedGameTime)
         {
+            //Console.WriteLine("    now = {0}   --  square last {1} ", DateTime.Now.Second, lastMoveTime);
+
+            //if (lastMoveTime == 60)
+            //    lastMoveTime = 0;
+
+            //if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
+            //{
+            //    if (!(DateTime.Now.Second == 59))
+            //    {
+            //        RandomAction();
+            //        lastMoveTime = lastMoveTime + 1;
+            //        //DebugSensorsInfo();
+            //    }
+            //    else
+            //        lastMoveTime = 60;
+            //}
+
+            if (firstUpdate)
+            {
+                Log.LogInformation("First update start");
+                //calc route
+                Queue<Node> route = calculateRoute();
+                //Create driver
+                Log.LogInformation("Create driver start");
+                driver = new Driver2(nodes, adjacencyMatrix, directionMap, route);
+                Log.LogInformation("Create driver end");
+                firstUpdate = false;
+                Log.LogInformation("First update end");
+            }
+
+            moveStep = moveStep % 4;
+            if (moveStep == 0)
+            {
+                /*
+                if (output)
+                {
+                    int t = 0;
+                    foreach (long i in rectangleInfo)
+                    {
+                        Log.LogInformation("SQUARE - Square info - " + t + " - " + i);
+                        t++;
+                    }
+                }*/
+                currentAction = driver.GetAction(circleInfo);
+                if (currentAction == Moves.MOVE_LEFT)
+                {
+                    currentAction = Moves.ROLL_LEFT;
+                } else if (currentAction == Moves.MOVE_RIGHT)
+                {
+                    currentAction = Moves.ROLL_RIGHT;
+                }
+                else if (currentAction == Moves.MORPH_UP)
+                {
+                    currentAction = Moves.JUMP;
+                }
+            }
+            moveStep++;
         }
 
         public override void EndGame(int collectiblesCaught, int timeElapsed)
@@ -127,7 +417,7 @@ namespace GeometryFriendsAgents
 
         public override string AgentName()
         {
-            return "Dummy SuboalAI Circle";
+            return agentName;
         }
 
         /// <summary>
@@ -265,19 +555,23 @@ namespace GeometryFriendsAgents
                     obstaclePixelCounter++;
                 }
             }
-            Log.LogInformation("SQUARE - obstaclePixelCounter - borders - " + obstaclePixelCounter);
-            //Fill in obstacles
-            for (int i = 0; i < oI.Length; i++)
+            /*if (abstractionOutput)
             {
-                int x = (int)oI[i].X;
-                int y = (int)oI[i].Y;
-                int h = (int)oI[i].Height;
-                int w = (int)oI[i].Width;
+                Log.LogInformation("SQUARE - obstaclePixelCounter - borders - " + obstaclePixelCounter);
+            }*/
+            //Fill in obstacles
+            for (int i = 0; i < obstaclesInfo.Length; i = i + 4)
+            {
+                int x = (int)obstaclesInfo[i];
+                int y = (int)obstaclesInfo[i + 1];
+                int h = (int)obstaclesInfo[i + 2];
+                int w = (int)obstaclesInfo[i + 3];
                 int upperLeftX = x - (w / 2);
                 int upperLeftY = y - (h / 2);
-
-                Log.LogInformation("SQUARE - obstaclePixelCounter - ULX " + upperLeftX + " - ULY " + upperLeftY + " - h " + h + " - w " + w);
-
+                //if (abstractionOutput)
+                //{
+                //    Log.LogInformation("SQUARE - obstaclePixelCounter - ULX " + upperLeftX + " - ULY " + upperLeftY + " - h " + h + " - w " + w);
+                //}
                 for (int j = upperLeftY; j < upperLeftY + h; j++)
                 {
                     for (int k = upperLeftX; k < upperLeftX + w; k++)
@@ -287,19 +581,21 @@ namespace GeometryFriendsAgents
                     }
                 }
             }
-
-            Log.LogInformation("SQUARE - obstaclePixelCounter - borders and obstacles - " + obstaclePixelCounter);
+            //if (abstractionOutput)
+            //{
+            //    Log.LogInformation("SQUARE - obstaclePixelCounter - borders and obstacles - " + obstaclePixelCounter);
+            //}
 
         }
 
         private void CreateNodes()
         {
-
             nodes = new List<Node>();
 
+
             //Square node
-            int squareX = (int)cI.X;
-            int squareY = (int)cI.Y;
+            int squareX = (int)circleInfo[0];
+            int squareY = (int)circleInfo[1];
 
             int s = 1;
             while (!obstacleOpenSpace[squareY + s, squareX])
@@ -309,13 +605,14 @@ namespace GeometryFriendsAgents
             Node square = new Node(squareX, squareY + s - 1, false);
             nodes.Add(square);
 
+
             //Nodes created by obstacles
-            for (int i = 0; i < oI.Length; i++)
+            for (int i = 0; i < obstaclesInfo.Length; i = i + 4)
             {
-                int x = (int)oI[i].X;
-                int y = (int)oI[i].Y;
-                int h = (int)oI[i].Height;
-                int w = (int)oI[i].Width;
+                int x = (int)obstaclesInfo[i];
+                int y = (int)obstaclesInfo[i + 1];
+                int h = (int)obstaclesInfo[i + 2];
+                int w = (int)obstaclesInfo[i + 3];
                 int rawX = x - (w / 2);
                 int rawY = y - (h / 2);
 
@@ -391,12 +688,13 @@ namespace GeometryFriendsAgents
                 }
 
             }
+            
 
             //Nodes created by diamonds
-            for (int i = 0; i < colI.Length; i++)
+            for (int i = 0; i < collectiblesInfo.Length; i = i + 2)
             {
-                int x = (int)colI[i].X;
-                int y = (int)colI[i].Y;
+                int x = (int)collectiblesInfo[i];
+                int y = (int)collectiblesInfo[i + 1];
                 Node node1 = new Node(x, y, true);
                 Node node2 = null;
                 //Fall down nodes of diamonds
@@ -426,16 +724,18 @@ namespace GeometryFriendsAgents
                     nodes.Add(node2);
                 }
             }
-
-            //output
-            int index = 0;
-            foreach (Node n in nodes)
+            /*if (abstractionOutput)
             {
-                Log.LogInformation("SQUARE - Nodes - " + index + " - " + n);
-                index++;
-            }
+                //output
+                int index = 0;
+                foreach (Node n in nodes)
+                {
+                    Log.LogInformation("SQUARE - Nodes - " + index + " - " + n);
+                    index++;
+                }
+            }*/
             Log.LogInformation("SQUARE - Number of nodes: " + nodes.Count);
-            Log.LogInformation("SQUARE - Number of diamonds: " + colI.Length);
+            Log.LogInformation("SQUARE - Number of diamonds: " + collectiblesInfo.Length / 2);
         }
 
         public static int[] CheckEdge(Node n1, Node n2)
