@@ -22,14 +22,12 @@ namespace GeometryFriendsAgents
         private Moves currentAction;
         private List<Moves> possibleMoves;
         private long lastMoveTime;
-        private Random rnd;
         //predictor of actions for the circle
         private ActionSimulator predictor = null;
         private DebugInformation[] debugInfo = null;
         private int debugCircleSize = 20;
         //Sensors Information and level state
         private CountInformation numbersInfo;
-        private RectangleRepresentation rectangleInfo;
         private CircleRepresentation circleInfo;
         private ObstacleRepresentation[] obstaclesInfo;
         private ObstacleRepresentation[] rectanglePlatformsInfo;
@@ -40,15 +38,14 @@ namespace GeometryFriendsAgents
         //Area of the game screen
         private Rectangle area;
 
-        Graph arena;
         Queue<Node> solution;
         Solver solver;
         public CircleAgent()
         {
+
             //setup for action updates
             lastMoveTime = DateTime.Now.Second;
             currentAction = Moves.NO_ACTION;
-            rnd = new Random();
             //prepare the possible moves  
             possibleMoves = new List<Moves>();
             possibleMoves.Add(Moves.ROLL_LEFT);
@@ -64,23 +61,20 @@ namespace GeometryFriendsAgents
         {
             numbersInfo = nI;
             nCollectiblesLeft = nI.CollectiblesCount;
-            rectangleInfo = rI;
             circleInfo = cI;
             obstaclesInfo = oI;
             rectanglePlatformsInfo = rPI;
             circlePlatformsInfo = cPI;
             collectiblesInfo = colI;
             this.area = area;
-
-            arena = new Graph(oI, rPI, cPI, colI, area);
-            solution = solver.solve(arena, cI);
+            solver = new Solver(new Graph(obstaclesInfo, circlePlatformsInfo, collectiblesInfo, circleInfo, this.area));
+            solution = solver.solve(cI);
 
         }
 
         public override void SensorsUpdated(int nC, RectangleRepresentation rI, CircleRepresentation cI, CollectibleRepresentation[] colI)
         {
             nCollectiblesLeft = nC;
-            rectangleInfo = rI;
             circleInfo = cI;
             collectiblesInfo = colI;
         }
@@ -94,21 +88,6 @@ namespace GeometryFriendsAgents
         public override string AgentName()
         {
             return agentName;
-        }
-        //simple algorithm for choosing a random action for the circle agent
-        private void RandomAction()
-        {
-            /*
-             Circle Actions
-             ROLL_LEFT = 1      
-             ROLL_RIGHT = 2
-             JUMP = 3
-             GROW = 4
-            */
-            currentAction = possibleMoves[rnd.Next(possibleMoves.Count)];
-
-            //send a message to the rectangle agent telling what action it chose
-            messages.Add(new AgentMessage("Going to :" + currentAction));
         }
         //implements abstract circle interface: GeometryFriends agents manager gets the current action intended to be actuated in the enviroment for this agent
         public override Moves GetAction()
@@ -124,7 +103,6 @@ namespace GeometryFriendsAgents
         protected void DebugSensorsInfo()
         {
             Log.LogInformation("Circle Agent - " + numbersInfo.ToString());
-            Log.LogInformation("Circle Agent - " + rectangleInfo.ToString());
             Log.LogInformation("Circle Agent - " + circleInfo.ToString());
             foreach (ObstacleRepresentation i in obstaclesInfo)
             {
