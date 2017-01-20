@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using GeometryFriends.AI.Perceptions.Information;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace GeometryFriendsAgents
 {
@@ -12,7 +13,7 @@ namespace GeometryFriendsAgents
     {
         private Node start, end;
         private Node[,] nodes;
-        private Graph graph;
+        public Graph graph;
         public Solver(Graph graph)
         {
             this.graph = graph;
@@ -22,6 +23,7 @@ namespace GeometryFriendsAgents
         }
         public Queue<Node> solve(CircleRepresentation cI)
         {
+            InitializeNodes(graph.map);
             Queue<Node> queue = new Queue<Node>();
             bool completed = search(start);
 
@@ -48,11 +50,14 @@ namespace GeometryFriendsAgents
                 // Check whether the end node has been reached
                 if (adjacentNode.location == this.end.location)
                 {
+                    Debug.Print("End reached at [" + adjacentNode.location.X + "," + adjacentNode.location.Y + "]");
+                    end = adjacentNode;
                     return true;
                 }
                 else
                 {
                     // If not, check the next set of nodes
+                    Debug.Print("End not reached at ["+adjacentNode.location.X+"," + adjacentNode.location.Y +"], testing its adjacent nodes");
                     if (search(adjacentNode)) // Note: Recurses back into Search(Node)
                         return true;
                 }
@@ -64,41 +69,45 @@ namespace GeometryFriendsAgents
             List<Node> walkableNodes = new List<Node>();
             IEnumerable<Point> nextLocations = GetAdjacentLocations(fromNode.location);
 
-            foreach (var location in nextLocations)
+            foreach (Point location in nextLocations)
             {
                 int x = location.X;
                 int y = location.Y;
 
+                
                 // Stay within the grid's boundaries
-                if (x < 0 || x >= graph.width || y < 0 || y >= graph.height)
+                if ((x < 0) || (x >= graph.width) || (y < 0) || (y >= graph.height))
                     continue;
 
-                Node node = this.nodes[x, y];
+                Node curr = nodes[x, y];
+
                 // Ignore non-walkable nodes
-                if (!node.isWalkable)
+                if (!curr.isWalkable)
                     continue;
 
                 // Ignore already-closed nodes
-                if (node.state == NodeState.Closed)
+                if (curr.state == NodeState.Closed)
                     continue;
 
                 // Already-open nodes are only added to the list if their G-value is lower going via this route.
-                if (node.state == NodeState.Open)
+                if (curr.state == NodeState.Open)
                 {
-                    float traversalCost = Node.GetTraversalCost(node.location, node.parent.location);
+                    float traversalCost = Node.GetTraversalCost(curr.location, curr.parent.location);
                     float gTemp = fromNode.G + traversalCost;
-                    if (gTemp < node.G)
+                    if (gTemp < curr.G)
                     {
-                        node.parent = fromNode;
-                        walkableNodes.Add(node);
+                        if (curr != fromNode)
+                            curr.parent = fromNode;
+                        walkableNodes.Add(curr);
                     }
                 }
                 else
                 {
                     // If it's untested, set the parent and flag it as 'Open' for consideration
-                    node.parent = fromNode;
-                    node.state = NodeState.Open;
-                    walkableNodes.Add(node);
+                    if (curr != fromNode)
+                        curr.parent = fromNode;
+                    curr.state = NodeState.Open;
+                    walkableNodes.Add(curr);
                 }
             }
 
@@ -128,6 +137,7 @@ namespace GeometryFriendsAgents
                     this.nodes[x, y] = new Node(new Point(x,y), map[x, y], this.graph.endLocation);
                 }
             }
+           //Debug.Print(map[167,263]+"");
         }
     }
 }

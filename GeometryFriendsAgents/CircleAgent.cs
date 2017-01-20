@@ -8,6 +8,8 @@ using GeometryFriends.AI.Perceptions.Information;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Diagnostics;
+
 namespace GeometryFriendsAgents
 {
     /// <summary>
@@ -16,16 +18,13 @@ namespace GeometryFriendsAgents
     public class CircleAgent : AbstractCircleAgent
     {
         //agent implementation specificiation
-        private bool implementedAgent;
         private string agentName = "RandPredictorCircle";
         //auxiliary variables for agent action
         private Moves currentAction;
         private List<Moves> possibleMoves;
         private long lastMoveTime;
         //predictor of actions for the circle
-        private ActionSimulator predictor = null;
         private DebugInformation[] debugInfo = null;
-        private int debugCircleSize = 20;
         //Sensors Information and level state
         private CountInformation numbersInfo;
         private CircleRepresentation circleInfo;
@@ -34,7 +33,6 @@ namespace GeometryFriendsAgents
         private ObstacleRepresentation[] circlePlatformsInfo;
         private CollectibleRepresentation[] collectiblesInfo;
         private int nCollectiblesLeft;
-        private List<AgentMessage> messages;
         //Area of the game screen
         private Rectangle area;
 
@@ -53,8 +51,8 @@ namespace GeometryFriendsAgents
             possibleMoves.Add(Moves.JUMP);
             possibleMoves.Add(Moves.GROW);
             possibleMoves.Add(Moves.NO_ACTION);
-
-
+            Debug.WriteLine("test");
+            Log.LogInformation("Circle Agent - " + numbersInfo.ToString());
         }
         //implements abstract circle interface: used to setup the initial information so that the agent has basic knowledge about the level
         public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
@@ -69,6 +67,40 @@ namespace GeometryFriendsAgents
             this.area = area;
             solver = new Solver(new Graph(obstaclesInfo, circlePlatformsInfo, collectiblesInfo, circleInfo, this.area));
             solution = solver.solve(cI);
+            int path = 0;
+            bool written = false;
+            for (int y = 0; y < solver.graph.height; y++)
+            {
+                string line = "|";
+                for (int x = 0; x < solver.graph.width; x++)
+                {
+                    foreach (Node node in solution)
+                    {
+                        if (node.location == new Point(x,y))
+                        {
+                            line += path.ToString();
+                            path++;
+                            if (path > 9)
+                                path = 0;
+                            written = true;
+                            continue;
+                        }
+                    }
+                    if (written)
+                        written = false;
+                    else if (x == solver.graph.startLocation.X && y == solver.graph.startLocation.Y)
+                        line += "O";
+                    else if (x == solver.graph.endLocation.X && y == solver.graph.endLocation.Y)
+                        line += "D";
+                    else if (solver.graph.map[x, y])
+                        line += " ";
+                    else
+                        line += "X";
+
+                }
+                line += "|";
+                Debug.Print(line);
+            }
 
         }
 
