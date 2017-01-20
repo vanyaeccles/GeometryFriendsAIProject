@@ -69,7 +69,9 @@ namespace GeometryFriendsAgents
 
         public static int nCollectiblesLeft;
 
-        private string agentName = "Jesus_F**KING_Christ";
+        private string agentName = "Mr. Bump";
+
+        private Random rnd;
 
 
         public CircleAgent()
@@ -84,30 +86,10 @@ namespace GeometryFriendsAgents
             possibleMoves.Add(Moves.GROW);
             possibleMoves.Add(Moves.NO_ACTION);
 
+            rnd = new Random();
+            currentAction = Moves.NO_ACTION;
+
         }
-
-
-        /*
-        public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
-        {
-            this.area = area;
-            this.nI = nI;
-            this.rI = rI;
-            this.cI = cI;
-            this.oI = oI;
-            this.rPI = rPI;
-            this.cPI = cPI;
-            setColI(colI);
-
-            Log.LogInformation("First update start");
-            //calc route
-            Queue<Node> route = calculateRoute();
-            //Create driver
-            Log.LogInformation("Create driver start");
-            //TODO - MAKE NEW DRIVER WITH DIFFERENT ACTUATORS
-            driver = new Driver2(nodes, adjacencyMatrix, directionMap, route);
-            Log.LogInformation("Create driver end");
-        }*/
 
         public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
         {
@@ -347,28 +329,15 @@ namespace GeometryFriendsAgents
         //Manager gets this action from agent
         public override Moves GetAction()
         {
+            /*if (currentAction == Moves.NO_ACTION)
+            {
+                return RandomAction();
+            */
             return currentAction;
         }
 
         public override void Update(TimeSpan elapsedGameTime)
         {
-            //Console.WriteLine("    now = {0}   --  square last {1} ", DateTime.Now.Second, lastMoveTime);
-
-            //if (lastMoveTime == 60)
-            //    lastMoveTime = 0;
-
-            //if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
-            //{
-            //    if (!(DateTime.Now.Second == 59))
-            //    {
-            //        RandomAction();
-            //        lastMoveTime = lastMoveTime + 1;
-            //        //DebugSensorsInfo();
-            //    }
-            //    else
-            //        lastMoveTime = 60;
-            //}
-
             if (firstUpdate)
             {
                 Log.LogInformation("First update start");
@@ -385,16 +354,6 @@ namespace GeometryFriendsAgents
             moveStep = moveStep % 4;
             if (moveStep == 0)
             {
-                /*
-                if (output)
-                {
-                    int t = 0;
-                    foreach (long i in rectangleInfo)
-                    {
-                        Log.LogInformation("SQUARE - Square info - " + t + " - " + i);
-                        t++;
-                    }
-                }*/
                 currentAction = driver.GetAction(circleInfo);
                 if (currentAction == Moves.MOVE_LEFT)
                 {
@@ -411,6 +370,12 @@ namespace GeometryFriendsAgents
             moveStep++;
         }
 
+        private Moves RandomAction()
+        {
+            Array values = Enum.GetValues(typeof(Moves));
+            return (Moves)values.GetValue(rnd.Next(values.Length));
+        }
+        
         public override void EndGame(int collectiblesCaught, int timeElapsed)
         {
         }
@@ -688,7 +653,7 @@ namespace GeometryFriendsAgents
                 }
 
             }
-            
+                    
 
             //Nodes created by diamonds
             for (int i = 0; i < collectiblesInfo.Length; i = i + 2)
@@ -868,6 +833,7 @@ namespace GeometryFriendsAgents
             }
 
             //delete diagonal lines between two fall down nodes to prevent to get stuck in a gap
+            
             for (int i = 0; i < nodes.Count; i++)
             {
                 for (int j = 0; j < nodes.Count; j++)
@@ -902,6 +868,7 @@ namespace GeometryFriendsAgents
                         }
                     }
                     //unreachable diamond found
+                    /*
                     if (unreachable)
                     {
                         nodes[i].setDiamond(false);
@@ -918,7 +885,7 @@ namespace GeometryFriendsAgents
                             directDistanceMap[k, i] = actionDirectionDistance[2];
                         }
                         nodes[i].setDiamond(true);
-                    }
+                    }*/
 
                     //From i to other nodes
                     unreachable = true;
@@ -935,6 +902,7 @@ namespace GeometryFriendsAgents
                         }
                     }
                     //unreachable diamond found
+                    /*
                     if (unreachable)
                     {
                         nodes[i].setDiamond(false);
@@ -951,7 +919,7 @@ namespace GeometryFriendsAgents
                             directDistanceMap[i, k] = actionDirectionDistance[2];
                         }
                         nodes[i].setDiamond(true);
-                    }
+                    }*/
                 }
             }
 

@@ -39,7 +39,7 @@ namespace GeometryFriendsAgents
         //runAlgorithm = 3 --> Greedy Goal AStar
         //runAlgorithm = 4 --> Permutation AStar
         //runAlgorithm = 5 --> Subgoal AStar
-        private int runAlgorithm = 0;
+        private int runAlgorithm = 5;
 
         public Driver2(List<Node> nodes, int[,] adjacencyMatrix, int[,] directionMap, Queue<Node> route)
         {
@@ -127,58 +127,8 @@ namespace GeometryFriendsAgents
             //if (distanceList.Count == 40 && distanceList[0] == distanceList[39] && RectangleAgent.nCollectiblesLeft > 0)
             if (distanceList.Count == 40 && distanceList[0] == distanceList[39] && CircleAgent.nCollectiblesLeft > 0)
                 {
-                distanceList = new List<float>();               
-                if(runAlgorithm == 0)
-                {
-                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                    int mctsAction = UseMCTSWithAStar(x, centerY);
-                    Log.LogInformation("Driver - Route recalc with MCTS and AStar in ms: " + sw.ElapsedMilliseconds);
-                    if (mctsAction >= 0)
-                    {
-                        return (Moves)mctsAction;
-                    }
-                }
-                else if (runAlgorithm == 1)
-                {
-                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                    int mctsAction = UseMCTS(x, centerY);
-                    Log.LogInformation("Driver - Route recalc with MCTS in ms: " + sw.ElapsedMilliseconds);
-                    if (mctsAction >= 0)
-                    {
-                        return (Moves)mctsAction;
-                    }
-                }
-                else if (runAlgorithm == 2)
-                {
-                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                    int astarAction = UseYHeuristicAStar(x, centerY);
-                    Log.LogInformation("Driver - Route recalc with Y-Heuristic AStar in ms: " + sw.ElapsedMilliseconds);
-                    if (astarAction >= 0)
-                    {
-                        return (Moves)astarAction;
-                    }
-                }
-                else if (runAlgorithm == 3)
-                {
-                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                    int astarAction = UseGreedyGoalAStar(x, centerY);
-                    Log.LogInformation("Driver - Route recalc with Greedy Goal AStar in ms: " + sw.ElapsedMilliseconds);
-                    if (astarAction >= 0)
-                    {
-                        return (Moves)astarAction;
-                    }
-                }
-                else if (runAlgorithm == 4)
-                {
-                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                    int astarAction = UsePermutationAStar(x, centerY);
-                    Log.LogInformation("Driver - Route recalc with Permutation AStar in ms: " + sw.ElapsedMilliseconds);
-                    if (astarAction >= 0)
-                    {
-                        return (Moves)astarAction;
-                    }
-                }
-                else if (runAlgorithm == 5)
+                distanceList = new List<float>();
+                if (runAlgorithm == 5)
                 {
                     System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
                     int astarAction = UseSubgoalAStar(x, centerY);
@@ -240,37 +190,7 @@ namespace GeometryFriendsAgents
                         Log.LogInformation("Driver - end of route, nextNode, no actions");
                     }
                     //Algorithms
-                    if (runAlgorithm == 0)
-                    {
-                        System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                        UseMCTSWithAStar(x, centerY);
-                        Log.LogInformation("Driver - Route recalc with MCTS and AStar in ms: " + sw.ElapsedMilliseconds);
-                    }
-                    else if (runAlgorithm == 1)
-                    {
-                        System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                        UseMCTS(x, centerY);
-                        Log.LogInformation("Driver - Route recalc with MCTS in ms: " + sw.ElapsedMilliseconds);
-                    }
-                    else if (runAlgorithm == 2)
-                    {
-                        System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                        UseYHeuristicAStar(x, centerY);
-                        Log.LogInformation("Driver - Route recalc with Y-Heuristic AStar in ms: " + sw.ElapsedMilliseconds);
-                    }
-                    else if (runAlgorithm == 3)
-                    {
-                        System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                        UseGreedyGoalAStar(x, centerY);
-                        Log.LogInformation("Driver - Route recalc with Greedy Goal AStar in ms: " + sw.ElapsedMilliseconds);
-                    }
-                    else if (runAlgorithm == 4)
-                    {
-                        System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                        UsePermutationAStar(x, centerY);
-                        Log.LogInformation("Driver - Route recalc with Permutation AStar in ms: " + sw.ElapsedMilliseconds);
-                    }
-                    else if (runAlgorithm == 5)
+                    if (runAlgorithm == 5)
                     {
                         System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
                         UseSubgoalAStar(x, centerY);
@@ -390,24 +310,25 @@ namespace GeometryFriendsAgents
             }
 
             // possible actions for direction upper right and upper left
-            //if (direction == 7 || direction == 5)
-            //{
-            //    if (alwaysCorrectH < 160 && CanMorphUp(y - alwaysCorrectH - 35, x, alwaysCorrectW))//!RectangleAgent.obstacleOpenSpace[y - alwaysCorrectH - 7, x])
-            //    {
-            //        Log.LogInformation("Driver - test52");
-            //        return Moves.MORPH_UP;
-            //    }
-            //    else if (direction == 7)
-            //    {
-            //        Log.LogInformation("Driver - test112");
-            //        return Moves.MOVE_RIGHT;
-            //    }
-            //    else if (direction == 5)
-            //    {
-            //        Log.LogInformation("Driver - test102");
-            //        return Moves.MOVE_LEFT;
-            //    }
-            //}
+            if (direction == 7 || direction == 5)
+            {
+                //if (alwaysCorrectH < 160 && CanMorphUp(y - alwaysCorrectH - 35, x, alwaysCorrectW))//!RectangleAgent.obstacleOpenSpace[y - alwaysCorrectH - 7, x])
+                if (!CircleAgent.obstacleOpenSpace[y - alwaysCorrectH - 7, x])
+                {
+                        Log.LogInformation("Driver - test52");
+                    return Moves.JUMP;
+                }
+                else if (direction == 7)
+                {
+                    Log.LogInformation("Driver - test112");
+                    return Moves.ROLL_RIGHT;
+                }
+                else if (direction == 5)
+                {
+                    Log.LogInformation("Driver - test102");
+                    return Moves.ROLL_LEFT;
+                }
+            }
 
             if (action == 1 && alwaysCorrectH > 102 && direction != 6)
             {
@@ -415,7 +336,7 @@ namespace GeometryFriendsAgents
             }
             if (action == 1 && alwaysCorrectH < 98 && CanMorphUp(y-alwaysCorrectH,x,alwaysCorrectW))
             {
-                return Moves.MORPH_UP;
+                return Moves.JUMP;
             }
             if (action == 2 && alwaysCorrectH > 52)
             {
@@ -423,7 +344,7 @@ namespace GeometryFriendsAgents
             }
             if (action == 3 && direction != 6 && alwaysCorrectH < 194 && CanMorphUp(y - alwaysCorrectH, x, alwaysCorrectW) && !IsDiagonalOrientation(hHalf, h, x, centerY, w) && vY < 5)
             {
-                return Moves.MORPH_UP;
+                return Moves.JUMP;
             }
             if(direction == 0 || direction == 7 || direction == 1 )
             {         
@@ -843,76 +764,6 @@ namespace GeometryFriendsAgents
                     }
                 }
             }
-        }
-
-        public int UseMCTSWithAStar(int x,int centerY)
-        {
-            Log.LogInformation("Driver MCTS ASTAR - MCTS ASTAR start");
-
-            int s = 1;
-            while (!RectangleAgent.obstacleOpenSpace[centerY + s, x])
-            {
-                s++;
-            }
-            Node square = new Node(x, centerY + s - 1, false);
-            this.nodes[0] = square;
-            int y = square.getY();
-
-            deleteCollectedDiamonds();
-
-            RectangleAgent.nodes = this.nodes;
-            RectangleAgent.CreateEdgesAndAdjacencyMatrix();
-            this.adjacencyMatrix = RectangleAgent.adjacencyMatrix;
-            this.directionMap = RectangleAgent.directionMap;
-
-            MCTS driverMCTS = new MCTS(this.nodes, this.adjacencyMatrix, RectangleAgent.nCollectiblesLeft, 2000);
-            Queue<Node> newRoute = driverMCTS.Run();
-
-            this.route = RectangleAgent.ClearRoute(newRoute.ToArray(), driverMCTS.outputNodeIndex);
-
-            //AStar
-            Node[] routeAsArray = this.route.ToArray();
-            List<Node> diamondNodes = new List<Node>();
-            for (int n = 0; n < routeAsArray.Length; n++)
-            {
-                if (routeAsArray[n].getDiamond() && !diamondNodes.Contains(routeAsArray[n]))
-                {
-                    diamondNodes.Add(routeAsArray[n]);
-                }
-            }
-
-            this.route = RectangleAgent.calcShortestRouteWithDiamondOrderAStar(diamondNodes);
-            //AStar end
-
-            return recalcNextNodes("MCTS ASTAR", x, y);
-        }
-
-        public int UseMCTS(int x, int centerY)
-        {
-            Log.LogInformation("Driver MCTS - MCTS start");
-
-            int s = 1;
-            while (!RectangleAgent.obstacleOpenSpace[centerY + s, x])
-            {
-                s++;
-            }
-            Node square = new Node(x, centerY + s - 1, false);
-            this.nodes[0] = square;
-            int y = square.getY();
-
-            deleteCollectedDiamonds();
-
-            RectangleAgent.nodes = this.nodes;
-            RectangleAgent.CreateEdgesAndAdjacencyMatrix();
-            this.adjacencyMatrix = RectangleAgent.adjacencyMatrix;
-            this.directionMap = RectangleAgent.directionMap;
-
-            MCTS driverMCTS = new MCTS(this.nodes, this.adjacencyMatrix, RectangleAgent.nCollectiblesLeft, 2000);
-            Queue<Node> newRoute = driverMCTS.Run();
-
-            this.route = RectangleAgent.ClearRoute(newRoute.ToArray(), driverMCTS.outputNodeIndex);
-
-            return recalcNextNodes("MCTS", x, y);
         }
 
         public int recalcNextNodes(String output, int x, int y)

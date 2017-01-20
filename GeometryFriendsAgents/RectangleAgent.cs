@@ -68,9 +68,6 @@ namespace GeometryFriendsAgents
         //variable to recognize if it is the first update to calc route and create driver
         bool firstUpdate;
 
-        // mcts
-        MCTS mcts;
-
         // output
         public static bool abstractionOutput = false;
         public static bool output = false;
@@ -330,88 +327,30 @@ namespace GeometryFriendsAgents
             Log.LogInformation("Route calc start");
 
             Queue<Node> route = new Queue<Node>();
-            if (runAlgorithm == 0) // MCTS and AStar
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+            List<int> diamondNodes = new List<int>();
+            for (int n = 0; n < nodes.Count; n++)
             {
-                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                mcts = new MCTS(nodes, adjacencyMatrix, nCollectiblesLeft, 2000);
-                route = mcts.Run();
-                route = ClearRoute(route.ToArray(), mcts.outputNodeIndex);
-
-                Node[] routeAsArray = route.ToArray();
-                List<Node> diamondNodes = new List<Node>();
-                for (int n = 0; n < routeAsArray.Length; n++)
+                if (nodes[n].getDiamond())
                 {
-                    if (routeAsArray[n].getDiamond() && !diamondNodes.Contains(routeAsArray[n]))
-                    {
-                        diamondNodes.Add(routeAsArray[n]);
-                    }
+                    diamondNodes.Add(n);
                 }
-
-                route = calcShortestRouteWithDiamondOrderAStar(diamondNodes);
-                Log.LogInformation("Elapsed MCTS and AStar time in ms: " + sw.ElapsedMilliseconds);
             }
-            else if (runAlgorithm == 1) // MCTS
+            SubgoalAStar sgAstar = new SubgoalAStar(0, diamondNodes, 2000, 0);
+            route = sgAstar.Run();
+            int diamondsToCollect = nCollectiblesLeft - 1;
+            while (route == null)
             {
-                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                mcts = new MCTS(nodes, adjacencyMatrix, nCollectiblesLeft, 2000);
-                route = mcts.Run();
-                route = ClearRoute(route.ToArray(), mcts.outputNodeIndex);
-                Log.LogInformation("Elapsed MCTS time in ms: " + sw.ElapsedMilliseconds);
-            }
-            else if (runAlgorithm == 2) // Y-Heuristic AStar
-            {
-                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                List<Node> diamondNodes = new List<Node>();
-                for (int n = 0; n < nodes.Count; n++)
+                if (diamondsToCollect == 0)
                 {
-                    if (nodes[n].getDiamond())
-                    {
-                        diamondNodes.Add(nodes[n]);
-                    }
+                    route = new Queue<Node>();
+                    break;
                 }
-                diamondNodes = calcDiamondOrder(diamondNodes);
-                route = calcShortestRouteWithDiamondOrderAStar(diamondNodes);
-                Log.LogInformation("Elapsed Y-Heuristic AStar time in ms: " + sw.ElapsedMilliseconds);
-            }
-            else if (runAlgorithm == 3) // Greedy Goal AStar
-            {
-                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                route = calcShortestRouteAStar();
-                Log.LogInformation("Elapsed Greedy Goal AStar time in ms: " + sw.ElapsedMilliseconds);
-            }
-            else if (runAlgorithm == 4) // Permutation AStar
-            {
-                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                route = calcShortestRouteAStarAllPermutations();
-                Log.LogInformation("Elapsed Permutation AStar time in ms: " + sw.ElapsedMilliseconds);
-            }
-            else if (runAlgorithm == 5) // Subgoal AStar
-            {
-                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                List<int> diamondNodes = new List<int>();
-                for (int n = 0; n < nodes.Count; n++)
-                {
-                    if (nodes[n].getDiamond())
-                    {
-                        diamondNodes.Add(n);
-                    }
-                }
-                SubgoalAStar sgAstar = new SubgoalAStar(0, diamondNodes, 2000, 0);
+                sgAstar = new SubgoalAStar(0, diamondNodes, 2000, diamondsToCollect);
                 route = sgAstar.Run();
-                int diamondsToCollect = nCollectiblesLeft - 1;
-                while (route == null)
-                {
-                    if (diamondsToCollect == 0)
-                    {
-                        route = new Queue<Node>();
-                        break;
-                    }
-                    sgAstar = new SubgoalAStar(0, diamondNodes, 2000, diamondsToCollect);
-                    route = sgAstar.Run();
-                    diamondsToCollect--;
-                }
-                Log.LogInformation("Elapsed Subgoal AStar time in ms: " + sw.ElapsedMilliseconds);
+                diamondsToCollect--;
             }
+            Log.LogInformation("Elapsed Subgoal AStar time in ms: " + sw.ElapsedMilliseconds);
             Log.LogInformation("Route calc end");
 
             return route;

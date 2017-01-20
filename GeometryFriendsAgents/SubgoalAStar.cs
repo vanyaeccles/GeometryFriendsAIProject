@@ -83,7 +83,7 @@ namespace GeometryFriendsAgents
                         continue;
                     }
                     // calc gScore
-                    int tentativeGScore = current.gScore  + RectangleAgent.directDistanceMap[current.nodeIndex, neighbor];
+                    int tentativeGScore = current.gScore  + CircleAgent.directDistanceMap[current.nodeIndex, neighbor];
                     //get neighbor in openList if exists
                     SubgoalAStarNode neighborInList = GetOfList(openList, neighbor, current);
                     //if neighbor is not in openList or the neighbor in the openList has a higher gScore
@@ -167,11 +167,12 @@ namespace GeometryFriendsAgents
         private List<int> Neighbors(int current)
         {
             List<int> neighbors = new List<int>();
-            for (int i = 0; i < RectangleAgent.nodes.Count; i++)
+            for (int i = 0; i < CircleAgent.nodes.Count; i++)
             {
                 if(current != i)
                 {
-                    if(RectangleAgent.adjacencyMatrix[current, i] > 0)
+                    
+                    if(CircleAgent.adjacencyMatrix[current, i] > 0)
                     {
                         neighbors.Add(i);
                     }
@@ -194,7 +195,7 @@ namespace GeometryFriendsAgents
             //create the correct route
             for (int i = routeReversed.Count-1; i >= 0; i--)
             {
-                route.Enqueue(RectangleAgent.nodes[routeReversed[i]]);
+                route.Enqueue(CircleAgent.nodes[routeReversed[i]]);
                 if (output)
                 {
                     Log.LogInformation("Subgoal AStar - route found:" + routeReversed[i]);
