@@ -155,19 +155,53 @@ namespace GeometryFriendsAgents
 
             //    if (moveStepSize == 0)
             //    {
-                    int x = ((int)circleInfo.X);
-                    int y = ((int)circleInfo.Y);
+                int i = ((int)circleInfo.X);
+                int j = ((int)circleInfo.Y);
 
                     //Get circle current point
-                    Point circlePoint = new Point(x, y);
+                Point circlePoint = new Point(i, j);
 
 
                     //Get closest diamond point
-                    Point closestDiamond = solver.graph.getClosestDiamond(collectiblesInfo, circlePoint);
+                Point closestDiamond = solver.graph.getClosestDiamond(collectiblesInfo, circlePoint);
 
-                    solver.setStartEnd(circlePoint, closestDiamond);
-                    solution = solver.solve(circleInfo, collectiblesInfo);
-                    driver.updateSolution(solution);
+                solver.setStartEnd(circlePoint, closestDiamond);
+                solution = solver.solve(circleInfo, collectiblesInfo);
+                int path = 0;
+                bool written = false;
+                for (int y = 0; y < solver.graph.height; y++)
+                    {
+                        string line = "|";
+                        for (int x = 0; x < solver.graph.width; x++)
+                        {
+                            foreach (Node node in solution)
+                            {
+                                if (node.location == new Point(x, y))
+                                {
+                                    line += path.ToString();
+                                    path++;
+                                    if (path > 9)
+                                        path = 0;
+                                    written = true;
+                                    continue;
+                                }
+                            }
+                            if (written)
+                                written = false;
+                            else if (x == solver.graph.startLocation.X && y == solver.graph.startLocation.Y)
+                                line += "O";
+                            else if (x == solver.graph.endLocation.X && y == solver.graph.endLocation.Y)
+                                line += "D";
+                            else if (solver.graph.trueMap[x, y])
+                                line += " ";
+                            else
+                                line += "X";
+
+                        }
+                        line += "|";
+                        Debug.Print(line);
+                    }
+                driver.updateSolution(solution);
                 //}
 
 

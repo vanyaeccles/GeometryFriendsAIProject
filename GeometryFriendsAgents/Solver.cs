@@ -137,6 +137,8 @@ namespace GeometryFriendsAgents
                     {
                         if (fromLocation == corner)
                             continue;
+                        if (fromLocation.X == corner.X)
+                            continue;
                         bool obstacle = false;
                         float distanceX = fromLocation.X - corner.X;
                         float distanceY = fromLocation.Y - corner.Y;
@@ -151,19 +153,18 @@ namespace GeometryFriendsAgents
                         if (!obstacle)
                             result.Add(corner);
                     }
-
-                    //result.AddRange(graph.corners);
                     break;
                 }
             }
             foreach (CollectibleRepresentation diamond in diamondInfo)
             {
-                if (fromLocation.X == diamond.X / 16)    //checks whether the collectable is directly above it
+                if (fromLocation.X == (int)diamond.X/16 && diamond.Y/16 < fromLocation.Y)    //checks whether the collectable is directly above it
                 {
-                    if (diamond.Y / 16 < fromLocation.Y)
+                    bool obstacle = false;
+                    bool decision;
+                    for(int i = (int)diamond.Y/16; i < (int) fromLocation.Y; i++)//Next, it checks whether there is any obstacles in between them
                     {
-                        bool obstacle = false;
-                        for (int i = (int)diamond.Y / 16 + 1; i < (int)fromLocation.Y; i++)//Next, it checks whether there is any obstacles in between them
+                        if (decision = graph.map[fromLocation.X, i])
                         {
                             if (graph.map[fromLocation.X, i])
                             {
@@ -171,8 +172,9 @@ namespace GeometryFriendsAgents
                                 break;
                             }
                         }
-                        result.Add(new Point((int)diamond.X / 16, ((int)diamond.Y / 16)));
                     }
+                    if (!obstacle)
+                        result.Add(new Point((int)diamond.X / 16, ((int)diamond.Y / 16)));
                 }
             }
             return result;
