@@ -266,33 +266,13 @@ namespace GeometryFriendsAgents
                 }
             }
 
-            if (IsDiagonalOrientation(hHalf, h, x, centerY, w) && distanceList.Count >= 15 && distanceList[0] == distanceList[14])
-            {     
-               Random random = new Random();
-               int ran = random.Next(2);
-               if(ran == 0)
-               {
-                   if (output)
-                   {
-                       Log.LogInformation("Driver - Moves RIGHT because DiagonalOrientation");
-                   }
-                   //return Moves.MOVE_RIGHT;
-                   return Moves.ROLL_RIGHT;
-                }
-               else if( ran == 1)
-               {
-                   if (output)
-                   {
-                       Log.LogInformation("Driver - Moves LEFT because DiagonalOrientation");
-                   }
-                    //return Moves.MOVE_LEFT;
-                    return Moves.ROLL_LEFT;
-                }
-            }
 
             if(previousDirection == 6 && (direction == 0 || direction == 4) && (Math.Abs(y - previousNode.getY())  > 4 ) )
             {
-                if (alwaysCorrectH < 160 && CanMorphUp(y-alwaysCorrectH-35,x,alwaysCorrectW))
+                Random random = new Random();
+                int ran = random.Next(2);
+                //if (alwaysCorrectH < 160 && CanMorphUp(y-alwaysCorrectH-35,x,alwaysCorrectW))
+                if (ran == 0)
                 {
                     return Moves.MORPH_UP;
                 }
@@ -313,7 +293,7 @@ namespace GeometryFriendsAgents
             if (direction == 7 || direction == 5)
             {
                 //if (alwaysCorrectH < 160 && CanMorphUp(y - alwaysCorrectH - 35, x, alwaysCorrectW))//!RectangleAgent.obstacleOpenSpace[y - alwaysCorrectH - 7, x])
-                if (!CircleAgent.obstacleOpenSpace[y - alwaysCorrectH - 7, x])
+                if (CircleAgent.obstacleOpenSpace[y - (int)CircleAgent.radius, x])
                 {
                         Log.LogInformation("Driver - test52");
                     return Moves.JUMP;
@@ -393,7 +373,20 @@ namespace GeometryFriendsAgents
             }
             if(direction == 6)
             {
-                if (alwaysCorrectH < 194 && CanMorphUp(y-alwaysCorrectH,x,alwaysCorrectW))
+
+                Random random = new Random();
+                int ran = random.Next(100);
+                if (ran < 98)
+                {
+                    return Moves.JUMP;
+                } else if (ran == 98)
+                {
+                    return Moves.ROLL_LEFT;
+                } else if (ran == 99)
+                {
+                    return Moves.ROLL_RIGHT;
+                }
+                /*if (alwaysCorrectH < 194 && CanMorphUp(y-alwaysCorrectH,x,alwaysCorrectW))
                 {              
                     return Moves.MORPH_UP;
                 }
@@ -409,7 +402,7 @@ namespace GeometryFriendsAgents
                         //return Moves.MOVE_LEFT;
                         return Moves.ROLL_LEFT;
                     }
-                }
+                }*/
 
             }
             if ((direction == 2) && nextNode.getLeadsToFallDown() && ((Math.Abs(y - previousNode.getY()) > alwaysCorrectH - 15 && Math.Abs(previousNode.getY() - nextNode.getY()) > 200) || (Math.Abs(y - previousNode.getY()) > alwaysCorrectH - 45 && Math.Abs(previousNode.getY() - nextNode.getY()) <= 200)))

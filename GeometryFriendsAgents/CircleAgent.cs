@@ -23,7 +23,7 @@ namespace GeometryFriendsAgents
 
         CountInformation nI;
         RectangleRepresentation rI;
-        CircleRepresentation cI;
+        public CircleRepresentation cI;
         ObstacleRepresentation[] oI;
         ObstacleRepresentation[] rPI;
         ObstacleRepresentation[] cPI;
@@ -60,6 +60,7 @@ namespace GeometryFriendsAgents
 
         int moveStep;
         Driver2 driver;
+        public static float radius;
 
         public static int[,] directDistanceMap;
 
@@ -94,6 +95,9 @@ namespace GeometryFriendsAgents
         public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
         {
             moveStep = 0;
+
+            radius = cI.Radius;
+
             //convert to old way in order to maintain compatibility
             DeprecatedSetup(
                 nI.ToArray(),
@@ -329,10 +333,10 @@ namespace GeometryFriendsAgents
         //Manager gets this action from agent
         public override Moves GetAction()
         {
-            /*if (currentAction == Moves.NO_ACTION)
-            {
-                return RandomAction();
-            */
+            //if (currentAction == Moves.NO_ACTION)
+            //{
+            //    return RandomAction();
+            //}
             return currentAction;
         }
 
@@ -372,8 +376,18 @@ namespace GeometryFriendsAgents
 
         private Moves RandomAction()
         {
-            Array values = Enum.GetValues(typeof(Moves));
-            return (Moves)values.GetValue(rnd.Next(values.Length));
+            switch (rnd.Next(5))
+            {
+                case 0:
+                    return Moves.JUMP;
+                case 1:
+                case 2:
+                    return Moves.ROLL_LEFT;
+                case 3:
+                case 4:
+                    return Moves.ROLL_RIGHT;
+            }
+            return Moves.NO_ACTION;
         }
         
         public override void EndGame(int collectiblesCaught, int timeElapsed)
@@ -551,6 +565,29 @@ namespace GeometryFriendsAgents
             //    Log.LogInformation("SQUARE - obstaclePixelCounter - borders and obstacles - " + obstaclePixelCounter);
             //}
 
+            //Fill in circle specific obstacles
+            for (int i = 0; i < circlePlatformsInfo.Length; i = i + 4)
+            {
+                int x = (int)circlePlatformsInfo[i];
+                int y = (int)circlePlatformsInfo[i + 1];
+                int h = (int)circlePlatformsInfo[i + 2];
+                int w = (int)circlePlatformsInfo[i + 3];
+                int upperLeftX = x - (w / 2);
+                int upperLeftY = y - (h / 2);
+                //if (abstractionOutput)
+                //{
+                //    Log.LogInformation("SQUARE - obstaclePixelCounter - ULX " + upperLeftX + " - ULY " + upperLeftY + " - h " + h + " - w " + w);
+                //}
+                for (int j = upperLeftY; j < upperLeftY + h; j++)
+                {
+                    for (int k = upperLeftX; k < upperLeftX + w; k++)
+                    {
+                        obstacleOpenSpace[j, k] = true;
+                        obstaclePixelCounter++;
+                    }
+                }
+            }
+
         }
 
         private void CreateNodes()
@@ -653,7 +690,90 @@ namespace GeometryFriendsAgents
                 }
 
             }
-                    
+
+            //Nodes created by circle specific obstacles
+            for (int i = 0; i < circlePlatformsInfo.Length; i = i + 4)
+            {
+                int x = (int)circlePlatformsInfo[i];
+                int y = (int)circlePlatformsInfo[i + 1];
+                int h = (int)circlePlatformsInfo[i + 2];
+                int w = (int)circlePlatformsInfo[i + 3];
+                int rawX = x - (w / 2);
+                int rawY = y - (h / 2);
+
+                //if upper is free create left node
+                if (!obstacleOpenSpace[rawY - 1, rawX])
+                {
+                    Node node1;
+                    //if upper left and left is free create upper left node
+                    if (!obstacleOpenSpace[rawY - 1, rawX - 1] && !obstacleOpenSpace[rawY, rawX - 1])
+                    {
+                        node1 = new Node(rawX - 1, rawY - 1, false);
+                        nodes.Add(node1);
+                        //Node created by obstacles fall down
+                        for (int j = rawY; j < fullHeight; j++)
+                        {
+                            if (obstacleOpenSpace[j, rawX - 1])
+                            {
+                                Node node2 = new Node(rawX - 1, j - 1, false);
+                                if (!nodes.Contains(node2))
+                                {
+                                    nodes.Add(node2);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    //if upper left and left is obstacle create upper node
+                    else if (obstacleOpenSpace[rawY - 1, rawX - 1] && obstacleOpenSpace[rawY, rawX - 1])
+                    {
+                        node1 = new Node(rawX, rawY - 1, false);
+                        if (!nodes.Contains(node1))
+                        {
+                            nodes.Add(node1);
+                        }
+                    }
+
+                }
+
+                rawX = x + (w / 2) - 1;
+                //If upper is free create right node
+                if (!obstacleOpenSpace[rawY - 1, rawX])
+                {
+                    Node node1;
+                    //if upper right and right is free create upper right node
+                    if (!obstacleOpenSpace[rawY - 1, rawX + 1] && !obstacleOpenSpace[rawY, rawX + 1])
+                    {
+                        node1 = new Node(rawX + 1, rawY - 1, false);
+                        nodes.Add(node1);
+                        //Node created by obstacles fall down
+                        for (int j = rawY; j < fullHeight; j++)
+                        {
+                            if (obstacleOpenSpace[j, rawX + 1])
+                            {
+                                Node node2 = new Node(rawX + 1, j - 1, false);
+                                if (!nodes.Contains(node2))
+                                {
+                                    nodes.Add(node2);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    //if upper right and right is obstacle create upper node
+                    else if (obstacleOpenSpace[rawY - 1, rawX + 1] && obstacleOpenSpace[rawY, rawX + 1])
+                    {
+                        node1 = new Node(rawX, rawY - 1, false);
+                        if (!nodes.Contains(node1))
+                        {
+                            nodes.Add(node1);
+                        }
+                    }
+
+                }
+
+            }
+
 
             //Nodes created by diamonds
             for (int i = 0; i < collectiblesInfo.Length; i = i + 2)
@@ -759,7 +879,7 @@ namespace GeometryFriendsAgents
                 Log.LogInformation("Direction: " + direction);
             //}
 
-            if (!((deltaY >= 200 && deltaX == 0) || (deltaY >= 50 && deltaX < 0) || (deltaY >= 50 && deltaX > 0) || (direction == 6 && deltaY < 200 && deltaY > 75 && deltaX == 0 && !n2.getDiamond())))
+            //if (!((deltaY >= 200 && deltaX == 0) || (deltaY >= 50 && deltaX < 0) || (deltaY >= 50 && deltaX > 0) || (direction == 6 && deltaY < 200 && deltaY > 75 && deltaX == 0 && !n2.getDiamond())))
             {
 
                 //bool[,] obstacleOpenSpaceCopy = (bool[,])obstacleOpenSpace.Clone();
@@ -833,7 +953,7 @@ namespace GeometryFriendsAgents
             }
 
             //delete diagonal lines between two fall down nodes to prevent to get stuck in a gap
-            
+            /*
             for (int i = 0; i < nodes.Count; i++)
             {
                 for (int j = 0; j < nodes.Count; j++)
@@ -846,7 +966,7 @@ namespace GeometryFriendsAgents
                         }
                     }
                 }
-            }
+            }*/
 
             //create edge for diamonds, which only can be reached by falling down
             for (int i = 0; i < nodes.Count; i++)
