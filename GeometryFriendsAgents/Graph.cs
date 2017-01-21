@@ -14,6 +14,7 @@ namespace GeometryFriendsAgents
         //final graph size needs to be 75*47
         public bool[,] map { get; set; }
         public bool[,] trueMap { get; set; }
+        public bool[,] diamondMap { get; set; }
         public List<Point> corners { get; set; }
         public int height, width;
         public Point startLocation { get; set; }
@@ -85,7 +86,8 @@ namespace GeometryFriendsAgents
                         trueMap[i, j] = false;
                 }
 
-            //removeFloatingPoints();
+            removeFloatingPoints(colI);
+            findCorners();
             //Quick Debug Setup to print out what the program thinks the area looks like
             for (int y = 0; y < height; y++)
             {
@@ -97,7 +99,13 @@ namespace GeometryFriendsAgents
                     else if (x == endLocation.X && y == endLocation.Y)
                         line += "D";
                     else if (map[x, y])
-                        line += " ";
+                    {
+                        string space = " ";
+                        foreach (Point corner in corners)
+                            if (corner.X == x && corner.Y == y)
+                                space = "c";
+                        line += space;
+                    }
                     else
                         line += "X";
                 }
@@ -109,21 +117,24 @@ namespace GeometryFriendsAgents
         }
 
         //This function's purpose is to remove any points that have no ground directly beneath them.
-        public void removeFloatingPoints()
+        public void removeFloatingPoints(CollectibleRepresentation[] colI)
         {
             for (int i = 0; i < map.GetLength(0); i++)
                 for (int j = 0; j < map.GetLength(1); j++)
                 {
                     if (j+2 >= height)//Is the point directly below this one outside the graph? (Point would then be on the bottom of the graph, and is considered on ground)
                     {
-                        if (j + 1 == height)
+                        if ((j + 3 == height))
                             map[i, j] = false;
                         continue;
                     } 
-                    if (!map[i, j+1])//Is the point directly below this one considered to be unwalkable? (Point would then be over a point considered an obstacle, and thus considered ground)
+                    if (!map[i, j+2])//Is the point directly below this one considered to be unwalkable? (Point would then be over a point considered an obstacle, and thus considered ground)
                         continue;
                     map[i, j] = false;
                 }
+            diamondMap = new bool[map.GetLength(0), map.GetLength(1)];
+            foreach (CollectibleRepresentation diamond in colI)
+                diamondMap[(int)diamond.X / 16, (int)diamond.Y / 16] = true;
         }
 
         //This function finds any corner points, ie, any point that is itself accessible, but its left or right neighbours are not.
@@ -132,9 +143,16 @@ namespace GeometryFriendsAgents
             for (int i= 0; i < map.GetLength(0); i++)
                 for (int j = 0; j < map.GetLength(1); j++)
                 {
-                    if(map[i,j] && (!map[i-1,j] || !map[i+1,j]))
+                    if(map[i,j])
                     {
-                        corners.Add(new Point(i, j));
+                        if (i - 1 < 0 || i + 1 >= map.GetLength(0))
+                        {
+                                corners.Add(new Point(i, j));
+                        }
+                        else if (!map[i - 1, j] || !map[i + 1, j])
+                        {         
+                                corners.Add(new Point(i, j));
+                        }
                     }
                 }
         }

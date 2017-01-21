@@ -14,6 +14,7 @@ namespace GeometryFriendsAgents
         private Node start, end;
         private Node[,] nodes;
         public Graph graph;
+        public CollectibleRepresentation[] diamondInfo;
         public Solver(Graph graph)
         {
             this.graph = graph;
@@ -21,10 +22,12 @@ namespace GeometryFriendsAgents
             start.state = NodeState.Open;
             end = new Node(graph.endLocation, true, graph.endLocation);
         }
-        public Queue<Node> solve(CircleRepresentation cI)
+        public Queue<Node> solve(CircleRepresentation cI, CollectibleRepresentation[] colI)
         {
             InitializeNodes(graph.map);
+            diamondInfo = colI;
             Queue<Node> queue = new Queue<Node>();
+            Debug.Print("Starting search for a path to [" + end.location.X + "," + end.location.Y + "]");
             bool completed = search(start);
 
             if (completed)
@@ -129,9 +132,44 @@ namespace GeometryFriendsAgents
             foreach(Point node in graph.corners)
             {
                 if (fromLocation == node)
-                {
-                    result.AddRange(graph.corners);
+                {   
+                    foreach(Point corner in graph.corners)
+                    {
+                        if (fromLocation == corner)
+                            continue;
+                        bool obstacle = false;
+                        float distanceX = fromLocation.X - corner.X;
+                        float distanceY = fromLocation.Y - corner.Y;
+                        int divisor = (distanceX >= distanceY ? (int)distanceX : (int)distanceY);   //This chooses the number of steps that should be taken, based on the larger of the two numbers.
+                        float divisorX = distanceX / divisor;                                       //determines the fraction of X/Y that we should proceed by each time.
+                        float divisorY = distanceY / divisor;                                       //Since the divisor was chosen as the larger of the two distance values, this value will <= 1
+                        for (int i = 1; i < divisor; i++)
+                        {
+                            if (!graph.trueMap[(int)(corner.X + divisorX * i), (int)(corner.Y + divisorY * i)]) //We add the divisor fragment to the location of corner, and check if the corresponding map coordinate is an obstacle or not
+                                obstacle = true;
+                        }
+                        if (!obstacle)
+                            result.Add(corner);
+                    }
+
+                    //result.AddRange(graph.corners);
                     break;
+                }
+            }
+            foreach (CollectibleRepresentation diamond in diamondInfo)
+            {
+                if (fromLocation.X == diamond.X/16 && diamond.Y/16 < fromLocation.Y)    //checks whether the collectable is directly above it
+                {
+                    bool obstacle = false;
+                    for(int i = (int)diamond.Y/16 + 1; i < (int) fromLocation.Y; i++)//Next, it checks whether there is any obstacles in between them
+                    {
+                        if (graph.map[fromLocation.X, i])
+                        {
+                            obstacle = true;
+                            break;
+                        }
+                    }
+                    result.Add(new Point((int)diamond.X / 16, ((int)diamond.Y / 16)));
                 }
             }
             return result;
@@ -144,6 +182,8 @@ namespace GeometryFriendsAgents
                 for (int x = 0; x < graph.width; x++)
                 {
                     this.nodes[x, y] = new Node(new Point(x,y), map[x, y], this.graph.endLocation);
+                    if (graph.diamondMap[x, y])
+                        this.nodes[x, y].isWalkable = true;
                 }
             }
         }

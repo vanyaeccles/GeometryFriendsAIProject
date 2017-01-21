@@ -66,7 +66,7 @@ namespace GeometryFriendsAgents
             collectiblesInfo = colI;
             this.area = area;
             solver = new Solver(new Graph(obstaclesInfo, circlePlatformsInfo, collectiblesInfo, circleInfo, this.area));
-            solution = solver.solve(cI);
+            solution = solver.solve(cI, collectiblesInfo);
             int path = 0;
             bool written = false;
             for (int y = 0; y < solver.graph.height; y++)
