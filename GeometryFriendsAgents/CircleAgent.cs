@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Diagnostics;
 
+
+
 namespace GeometryFriendsAgents
 {
     /// <summary>
@@ -36,14 +38,22 @@ namespace GeometryFriendsAgents
         //Area of the game screen
         private Rectangle area;
 
+        bool firstSetup;
+
+
         Queue<Node> solution;
         Solver solver;
+
+        Driver driver;
+        int moveStepSize;
+        int moveStepSizeReSolve;
+
         public CircleAgent()
         {
 
             //setup for action updates
             lastMoveTime = DateTime.Now.Second;
-            currentAction = Moves.NO_ACTION;
+            currentAction = Moves.ROLL_RIGHT;
             //prepare the possible moves  
             possibleMoves = new List<Moves>();
             possibleMoves.Add(Moves.ROLL_LEFT);
@@ -69,6 +79,7 @@ namespace GeometryFriendsAgents
             solution = solver.solve(cI, collectiblesInfo);
             int path = 0;
             bool written = false;
+            moveStepSize = 0;
             for (int y = 0; y < solver.graph.height; y++)
             {
                 string line = "|";
@@ -101,7 +112,7 @@ namespace GeometryFriendsAgents
                 line += "|";
                 Debug.Print(line);
             }
-
+            driver = new Driver(solution);
         }
 
         public override void SensorsUpdated(int nC, RectangleRepresentation rI, CircleRepresentation cI, CollectibleRepresentation[] colI)
@@ -109,6 +120,12 @@ namespace GeometryFriendsAgents
             nCollectiblesLeft = nC;
             circleInfo = cI;
             collectiblesInfo = colI;
+        }
+
+        public void updateSolution(CircleRepresentation cI)
+        {
+            solution = solver.solve(cI, collectiblesInfo);
+            driver = new GeometryFriendsAgents.Driver(solution);
         }
 
         //implements abstract circle interface: signals if the agent is actually implemented or not
@@ -126,11 +143,58 @@ namespace GeometryFriendsAgents
         {
             return currentAction;
         }
+
+
         //implements abstract circle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
-            
+            moveStepSize = moveStepSize % 4;
+            //moveStepSizeReSolve = moveStepSize % 3;
+            if (moveStepSize == 0)
+            {
+
+            //    if (moveStepSize == 0)
+            //    {
+                    int x = ((int)circleInfo.X);
+                    int y = ((int)circleInfo.Y);
+
+                    //Get circle current point
+                    Point circlePoint = new Point(x, y);
+
+
+                    //Get closest diamond point
+                    Point closestDiamond = solver.graph.getClosestDiamond(collectiblesInfo, circlePoint);
+
+                    solver.setStartEnd(circlePoint, closestDiamond);
+                    solution = solver.solve(circleInfo, collectiblesInfo);
+                    driver.updateSolution(solution);
+                //}
+
+
+
+                currentAction = driver.getAction(circleInfo);
+
+
+
+                
+                //if (currentAction == Moves.MOVE_LEFT)
+                //{
+                //    currentAction = Moves.ROLL_LEFT;
+                //}
+                //else if (currentAction == Moves.MOVE_RIGHT)
+                //{
+                //    currentAction = Moves.ROLL_RIGHT;
+                //}
+                //else if (currentAction == Moves.JUMP)
+                //{
+                //    currentAction = Moves.JUMP;
+                //}
+            }
+            moveStepSize++;
+
         }
+
+
         //typically used console debugging used in previous implementations of GeometryFriends
         protected void DebugSensorsInfo()
         {

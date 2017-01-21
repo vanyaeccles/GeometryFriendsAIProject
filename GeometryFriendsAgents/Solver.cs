@@ -11,7 +11,7 @@ namespace GeometryFriendsAgents
 {
     class Solver
     {
-        private Node start, end;
+        public Node start, end;
         private Node[,] nodes;
         public Graph graph;
         public CollectibleRepresentation[] diamondInfo;
@@ -158,18 +158,21 @@ namespace GeometryFriendsAgents
             }
             foreach (CollectibleRepresentation diamond in diamondInfo)
             {
-                if (fromLocation.X == diamond.X/16 && diamond.Y/16 < fromLocation.Y)    //checks whether the collectable is directly above it
+                if (fromLocation.X == diamond.X / 16)    //checks whether the collectable is directly above it
                 {
-                    bool obstacle = false;
-                    for(int i = (int)diamond.Y/16 + 1; i < (int) fromLocation.Y; i++)//Next, it checks whether there is any obstacles in between them
+                    if (diamond.Y / 16 < fromLocation.Y)
                     {
-                        if (graph.map[fromLocation.X, i])
+                        bool obstacle = false;
+                        for (int i = (int)diamond.Y / 16 + 1; i < (int)fromLocation.Y; i++)//Next, it checks whether there is any obstacles in between them
                         {
-                            obstacle = true;
-                            break;
+                            if (graph.map[fromLocation.X, i])
+                            {
+                                obstacle = true;
+                                break;
+                            }
                         }
+                        result.Add(new Point((int)diamond.X / 16, ((int)diamond.Y / 16)));
                     }
-                    result.Add(new Point((int)diamond.X / 16, ((int)diamond.Y / 16)));
                 }
             }
             return result;
@@ -190,6 +193,8 @@ namespace GeometryFriendsAgents
 
         public void setStartEnd(Point startpoint, Point endpoint)
         {
+            startpoint = new Point(startpoint.X / 16, startpoint.Y/16);
+            endpoint = new Point(endpoint.X, endpoint.Y);
             start = new GeometryFriendsAgents.Node(startpoint, true, endpoint);
             graph.startLocation = startpoint;
             end = new Node(endpoint, true, endpoint);

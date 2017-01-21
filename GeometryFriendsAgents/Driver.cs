@@ -3,48 +3,66 @@ using GeometryFriends.AI;
 using System;
 using System.Collections.Generic;
 using GeometryFriends.AI.Perceptions.Information;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using GeometryFriends.AI.Perceptions.Information;
+using System.Drawing;
+using System.Diagnostics;
+
 namespace GeometryFriendsAgents
 {
     class Driver
     {
-        private List<Node> nodes;
-        private int[,] adjacencyMatrix;
-        // private float[,] distanceMap;
-        private int[,] directionMap;
-        private Queue<Node> route;
+       
+        private Queue<Node> solution;
         private Node previousNode;
         private Node nextNode;
         private Node nextNode2;
+        private Node nextNode3;
         private int previousDirection;
         private int direction;
         private int direction2;
         private int previousAction;
         private int action;
         private int action2;
-        private float distance, oneNodeDistance;
+        private float distance, oneNodeDistance, previousDistance;
         private List<float> distanceList;
-        bool output = false;
         enum Direction { Right, RightDown, Down, LeftDown, Left, LeftUp, Up, RightUp };
+        private bool round1 = false;
 
 
 
-
-        public Driver(List<Node> nodes, Queue<Node> route)
+        public Driver(Queue<Node> solution) //List<Node> nodes, 
         {
-            this.nodes = nodes;
-            this.route = route;
+            
+            this.solution = solution;
             distanceList = new List<float>();
-            this.previousNode = route.Dequeue();
-            this.nextNode = route.Dequeue();
-            this.nextNode2 = route.Dequeue();
-           
+            this.previousNode = solution.Dequeue();
+            this.nextNode = solution.Dequeue();
+            this.nextNode2 = solution.Dequeue();
+            this.nextNode3 = solution.Dequeue();
+
         }
             
+        public void updateSolution(Queue<Node> solution)
+        {
+            this.solution = solution;
+            distanceList = new List<float>();
+            this.previousNode = solution.Dequeue();
+            this.nextNode = solution.Dequeue();
+            this.nextNode2 = solution.Dequeue();
+            this.nextNode3 = solution.Dequeue();
+
+        }
 
         //TODO (maybe) Update the A* search path each time getAction is called?
 
 
-        public Moves getAction(float[] shapeInfo)
+        public Moves getAction(CircleRepresentation shapeInfo)
         {
             // circleInfo[] Description
             //
@@ -55,12 +73,12 @@ namespace GeometryFriendsAgents
             //   2  - Circle X Velocity
             //   3  - Circle Y Velocity
             //   4  - Circle Radius
-
-            int x = (int)shapeInfo[0];
-            int y = (int)shapeInfo[1];
-            int vX = (int)shapeInfo[2];
-            int vY = (int)shapeInfo[3];
-            int h = (int)shapeInfo[4];
+            
+            int x = ((int)shapeInfo.X)/16;
+            int y = ((int)shapeInfo.Y)/16;
+            int vX = ((int)shapeInfo.VelocityX)/16;
+            int vY = ((int)shapeInfo.VelocityY)/16;
+            int h = ((int)shapeInfo.Radius)/16;
 
             int direction;
 
@@ -75,13 +93,26 @@ namespace GeometryFriendsAgents
             oneNodeDistance = (float)Math.Sqrt(Math.Pow((nextNode.location.X * 2) - nextNode.location.X, 2) + Math.Pow((nextNode.location.Y * 2) - nextNode.location.Y, 2));
 
 
+            distanceList.Add(distance);
+
+            if (distanceList.Count == 40 && distanceList[0] == distanceList[39])
+            {
+                direction = 4;
+            }
+
+            if (distanceList.Count >= 40)
+            {
+                distanceList = new List<float>();
+            }
+
+
 
             //Make decision on next movement
 
-            bool fast = (vX > 2 || vX < -2);
+            bool fast = (vX > 5 || vX < -5);
 
             //NextNode is adjacent and to the left and going fast on x
-            if ( nextX < x && distance < oneNodeDistance && fast)
+            if (nextX < x && distance < oneNodeDistance && fast)
             {
                 direction = 6; //Do nothing
             }
@@ -95,17 +126,17 @@ namespace GeometryFriendsAgents
             //NextNode is far and to the left
             else if (nextX < x && distance >= oneNodeDistance)
             {
-                direction = 1; //Jump left!
+                direction = 0; //Jump left!
             }
 
             //NextNode is directly above
-            else if (nextY > y && nextX == x)
+            else if (nextY < y && nextX == x)
             {
                 direction = 2; //Jump!
             }
 
             //NextNode is directly below
-            else if (nextY < y && nextX == x)
+            else if (nextY > y && nextX == x)
             {
                 direction = 6; //Stay still and fall!
             }
@@ -125,15 +156,15 @@ namespace GeometryFriendsAgents
             //NextNode is far and to the right
             else if (nextX < x && distance >= oneNodeDistance)
             {
-                direction = 3; //Jump right!
+                direction = 4; //Jump right!
             }
+
             else
             {
                 direction = 6; // Do nothing
             }
 
-            
-           
+
 
 
             // Directions
@@ -144,11 +175,11 @@ namespace GeometryFriendsAgents
             //Return the movement
             if (direction == 0)
             {
-                return Moves.MOVE_LEFT;
+                return Moves.ROLL_LEFT;
             }
             else if (direction == 1)
             {
-                return Moves.JUMP;
+                return Moves.ROLL_LEFT;
             }
             else if (direction == 2)
             {
@@ -156,15 +187,15 @@ namespace GeometryFriendsAgents
             }
             else if (direction == 3)
             {
-                return Moves.JUMP;
+                return Moves.ROLL_RIGHT;
             }
             else if (direction == 4)
             {
-                return Moves.MOVE_RIGHT;
+                return Moves.ROLL_RIGHT;
             }
             else if (direction == 5)
             {
-                return Moves.MOVE_RIGHT;
+                return Moves.ROLL_RIGHT;
             }
             else if (direction == 6)
             {
@@ -172,12 +203,41 @@ namespace GeometryFriendsAgents
             }
             else if (direction == 7)
             {
-                return Moves.MOVE_LEFT;
+                return Moves.ROLL_LEFT;
             }
             else
             {
                 return Moves.NO_ACTION;
-            }   
+            }
+
+            //switch (direction)
+            //{
+            //    case 0:
+            //        return Moves.ROLL_LEFT;
+            //        break;
+            //    case 1:
+            //        return Moves.ROLL_LEFT;
+            //        break;
+            //    case 2:
+            //        return Moves.JUMP;
+            //        break;
+            //    case 3:
+            //        return Moves.ROLL_RIGHT;
+            //        break;
+            //    case 4:
+            //        return Moves.ROLL_RIGHT;
+            //        break;
+            //    case 5:
+            //        return Moves.ROLL_RIGHT;
+            //        break;
+            //    case 6:
+            //        return Moves.NO_ACTION;
+            //        break;
+            //    case 7:
+            //        return Moves.ROLL_LEFT;
+            //        break;
+
+            //}
 
 
         }
