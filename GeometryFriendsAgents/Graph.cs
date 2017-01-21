@@ -13,6 +13,8 @@ namespace GeometryFriendsAgents
     {
         //final graph size needs to be 75*47
         public bool[,] map { get; set; }
+        public bool[,] trueMap { get; set; }
+        public List<Point> corners { get; set; }
         public int height, width;
         public Point startLocation { get; set; }
         public Point endLocation { get; set; }
@@ -20,6 +22,8 @@ namespace GeometryFriendsAgents
 
         public Graph(ObstacleRepresentation[] oI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, CircleRepresentation cI, Rectangle area)
         {
+            corners = new List<Point>();
+
             height = area.Height + 1;
             width = area.Width + 1;
             bool[,] map_temp = new bool[width, height]; // A Map of the points within the system. True means that the point has no obstacle within it.
@@ -50,7 +54,7 @@ namespace GeometryFriendsAgents
             {
                 int width = (int)obstacle.Width;
                 int height = (int)obstacle.Height;
-                Point center = new Point((int)obstacle.X+40, (int)obstacle.Y+40);
+                Point center = new Point((int)obstacle.X-40, (int)obstacle.Y-40);
                 for (int i = (center.X - width / 2); i <= (center.X + width / 2); i++)
                 {
                     for (int j = (center.Y - height / 2); j <= (center.Y + height / 2); j++)
@@ -71,7 +75,17 @@ namespace GeometryFriendsAgents
             startLocation = new Point((int)cI.X / 16, (int)cI.Y / 16);
             endLocation = getClosestDiamond(colI, startLocation);
 
+            trueMap = new bool[map.GetLength(0), map.GetLength(1)];
+            for (int i = 0; i < map.GetLength(0); i++)
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    if (map[i, j])
+                        trueMap[i,j] = true;
+                    else
+                        trueMap[i, j] = false;
+                }
 
+            //removeFloatingPoints();
             //Quick Debug Setup to print out what the program thinks the area looks like
             for (int y = 0; y < height; y++)
             {
@@ -93,6 +107,38 @@ namespace GeometryFriendsAgents
                     
 
         }
+
+        //This function's purpose is to remove any points that have no ground directly beneath them.
+        public void removeFloatingPoints()
+        {
+            for (int i = 0; i < map.GetLength(0); i++)
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    if (j+2 >= height)//Is the point directly below this one outside the graph? (Point would then be on the bottom of the graph, and is considered on ground)
+                    {
+                        if (j + 1 == height)
+                            map[i, j] = false;
+                        continue;
+                    } 
+                    if (!map[i, j+1])//Is the point directly below this one considered to be unwalkable? (Point would then be over a point considered an obstacle, and thus considered ground)
+                        continue;
+                    map[i, j] = false;
+                }
+        }
+
+        //This function finds any corner points, ie, any point that is itself accessible, but its left or right neighbours are not.
+        public void findCorners()
+        {
+            for (int i= 0; i < map.GetLength(0); i++)
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    if(map[i,j] && (!map[i-1,j] || !map[i+1,j]))
+                    {
+                        corners.Add(new Point(i, j));
+                    }
+                }
+        }
+
         public void setPoints(Point start, Point end)
         {
             endLocation = end;

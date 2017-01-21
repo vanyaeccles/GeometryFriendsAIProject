@@ -113,9 +113,9 @@ namespace GeometryFriendsAgents
 
             return walkableNodes;
         }
-        private static IEnumerable<Point> GetAdjacentLocations(Point fromLocation)
+        private IEnumerable<Point> GetAdjacentLocations(Point fromLocation)
         {
-            return new Point[]
+            List<Point> result = new List<Point>
             {
                 new Point(fromLocation.X-1, fromLocation.Y-1),
                 new Point(fromLocation.X-1, fromLocation.Y  ),
@@ -126,6 +126,15 @@ namespace GeometryFriendsAgents
                 new Point(fromLocation.X+1, fromLocation.Y-1),
                 new Point(fromLocation.X,   fromLocation.Y-1)
             };
+            foreach(Point node in graph.corners)
+            {
+                if (fromLocation == node)
+                {
+                    result.AddRange(graph.corners);
+                    break;
+                }
+            }
+            return result;
         }
         private void InitializeNodes(bool[,] map)
         {
@@ -137,7 +146,14 @@ namespace GeometryFriendsAgents
                     this.nodes[x, y] = new Node(new Point(x,y), map[x, y], this.graph.endLocation);
                 }
             }
-           //Debug.Print(map[167,263]+"");
+        }
+
+        public void setStartEnd(Point startpoint, Point endpoint)
+        {
+            start = new GeometryFriendsAgents.Node(startpoint, true, endpoint);
+            graph.startLocation = startpoint;
+            end = new Node(endpoint, true, endpoint);
+            graph.endLocation = endpoint;
         }
     }
 }

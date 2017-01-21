@@ -62,7 +62,7 @@ namespace GeometryFriendsAgents
             circleInfo = cI;
             obstaclesInfo = oI;
             rectanglePlatformsInfo = rPI;
-            circlePlatformsInfo = cPI;
+            circlePlatformsInfo = rPI;
             collectiblesInfo = colI;
             this.area = area;
             solver = new Solver(new Graph(obstaclesInfo, circlePlatformsInfo, collectiblesInfo, circleInfo, this.area));
@@ -92,7 +92,7 @@ namespace GeometryFriendsAgents
                         line += "O";
                     else if (x == solver.graph.endLocation.X && y == solver.graph.endLocation.Y)
                         line += "D";
-                    else if (solver.graph.map[x, y])
+                    else if (solver.graph.trueMap[x, y])
                         line += " ";
                     else
                         line += "X";
