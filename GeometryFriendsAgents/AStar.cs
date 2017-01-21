@@ -27,10 +27,8 @@ namespace GeometryFriendsAgents
             //The set of tentative nodes to be evaluated, initially containing the start node
             openList = new List<int[]>();
             //Array where the node-index came from: cameFrom[7] returns the index of the predecessor of node with index 7
-
-            //cameFrom = new int[RectangleAgent.nodes.Count];
+            
             cameFrom = new int[CircleAgent.nodes.Count];
-            //for (int i = 0; i < RectangleAgent.nodes.Count; i++)
             for (int i = 0; i < CircleAgent.nodes.Count; i++)
                 {
                 cameFrom[i] = -1;
@@ -47,8 +45,6 @@ namespace GeometryFriendsAgents
         //returns the euclidean distance between two nodes
         private int HeuristicValue(int start,int goal)
         {
-            //Node n1 = RectangleAgent.nodes[start];
-            //Node n2 = RectangleAgent.nodes[goal];
             Node n1 = CircleAgent.nodes[start];
             Node n2 = CircleAgent.nodes[goal];
             int distance = (int)Math.Sqrt(Math.Pow(n1.getX() - n2.getX(), 2) + Math.Pow(n1.getY() - n2.getY(), 2));
@@ -80,7 +76,6 @@ namespace GeometryFriendsAgents
                         continue;
                     }
                     // calc gScore
-                    //int tentativeGScore = current[2]  + RectangleAgent.directDistanceMap[current[0], neighbor];
                     int tentativeGScore = current[2] + CircleAgent.directDistanceMap[current[0], neighbor];
                     //get neighbor in openList if exists
                     int[] neighborInList = GetOfList(openList, neighbor);
@@ -144,12 +139,10 @@ namespace GeometryFriendsAgents
         private List<int> Neighbors(int current)
         {
             List<int> neighbors = new List<int>();
-            //for (int i = 0; i < RectangleAgent.nodes.Count; i++)
             for (int i = 0; i < CircleAgent.nodes.Count; i++)
                 {
                 if(current != i)
                 {
-                    //if(RectangleAgent.adjacencyMatrix[current, i] > 0)
                     if (CircleAgent.adjacencyMatrix[current, i] > 0)
                         {
                         neighbors.Add(i);
@@ -173,7 +166,6 @@ namespace GeometryFriendsAgents
             //create the correct route
             for (int i = routeReversed.Count-1; i >= 0; i--)
             {
-                //route.Enqueue(RectangleAgent.nodes[routeReversed[i]]);
                 route.Enqueue(CircleAgent.nodes[routeReversed[i]]);
                 if (output)
                 {

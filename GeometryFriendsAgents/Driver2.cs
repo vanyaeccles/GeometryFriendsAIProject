@@ -11,7 +11,6 @@ namespace GeometryFriendsAgents
     {
         private List<Node> nodes;
         private int[,] adjacencyMatrix;
-       // private float[,] distanceMap;
         private int[,] directionMap;
         private Queue<Node> route;
 
@@ -33,19 +32,10 @@ namespace GeometryFriendsAgents
 
         enum Direction { Right, RightDown, Down, LeftDown, Left, LeftUp, Up, RightUp };
 
-        //runAlgorithm = 0 --> MCTS and AStar
-        //runAlgorithm = 1 --> MCTS
-        //runAlgorithm = 2 --> Y-Heuristic AStar
-        //runAlgorithm = 3 --> Greedy Goal AStar
-        //runAlgorithm = 4 --> Permutation AStar
-        //runAlgorithm = 5 --> Subgoal AStar
-        private int runAlgorithm = 5;
-
         public Driver2(List<Node> nodes, int[,] adjacencyMatrix, int[,] directionMap, Queue<Node> route)
         {
             this.nodes = nodes;
             this.adjacencyMatrix = adjacencyMatrix;
-            //this.distanceMap = distanceMap;
             this.directionMap = directionMap;
             this.route = route;
             distanceList = new List<float>();
@@ -108,12 +98,6 @@ namespace GeometryFriendsAgents
             int alwaysCorrectH = h;
             int alwaysCorrectHHalf = hHalf;
             int alwaysCorrectW = w;
-            //if (IsTwisted(hHalf, h, x, centerY, w))
-            //{
-            //    alwaysCorrectH = w;
-            //    alwaysCorrectW = 10000 / alwaysCorrectH;
-            //    alwaysCorrectHHalf = alwaysCorrectH / 2;
-            //}
             y = y + alwaysCorrectHHalf;
 
             distance = (float)Math.Sqrt(Math.Pow(x - nextNode.getX(), 2) + Math.Pow(y - nextNode.getY(), 2));
@@ -123,24 +107,19 @@ namespace GeometryFriendsAgents
                 Log.LogInformation("Driver - Distance - " + distance);
             }
 
-            //Algorithms
-            //if (distanceList.Count == 40 && distanceList[0] == distanceList[39] && RectangleAgent.nCollectiblesLeft > 0)
+            //Algorithm
             if (distanceList.Count == 40 && distanceList[0] == distanceList[39] && CircleAgent.nCollectiblesLeft > 0)
-                {
+            {
                 distanceList = new List<float>();
-                if (runAlgorithm == 5)
+                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+                int astarAction = UseSubgoalAStar(x, centerY);
+                Log.LogInformation("Driver - Route recalc with Subgoal AStar in ms: " + sw.ElapsedMilliseconds);
+                if (astarAction >= 0)
                 {
-                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                    int astarAction = UseSubgoalAStar(x, centerY);
-                    Log.LogInformation("Driver - Route recalc with Subgoal AStar in ms: " + sw.ElapsedMilliseconds);
-                    if (astarAction >= 0)
-                    {
-                        return (Moves)astarAction;
-                    }
+                    return (Moves)astarAction;
                 }
-                
             }
-            //Algorithms end
+            //Algorithm end
 
             if(distanceList.Count >= 40)
             {
@@ -190,12 +169,10 @@ namespace GeometryFriendsAgents
                         Log.LogInformation("Driver - end of route, nextNode, no actions");
                     }
                     //Algorithms
-                    if (runAlgorithm == 5)
-                    {
-                        System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-                        UseSubgoalAStar(x, centerY);
-                        Log.LogInformation("Driver - Route recalc with Subgoal AStar in ms: " + sw.ElapsedMilliseconds);
-                    }
+                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+                    UseSubgoalAStar(x, centerY);
+                    Log.LogInformation("Driver - Route recalc with Subgoal AStar in ms: " + sw.ElapsedMilliseconds);
+                    
                     return Moves.NO_ACTION;
                     //Algorithms end
                 }
@@ -254,14 +231,12 @@ namespace GeometryFriendsAgents
 
             if(nextNode.getPseudo() && distanceList.Count >= 10 && distanceList[0] == distanceList[9])
             {
-                if(direction == 0 && distance < 200)
+                if(direction == 0 )
                 {
-                    //return Moves.MOVE_LEFT;
                     return Moves.ROLL_LEFT;
                 }
-                if (direction == 4 && distance < 200)
+                if (direction == 4 )
                 {
-                    //return Moves.MOVE_RIGHT;
                     return Moves.ROLL_RIGHT;
                 }
             }
@@ -271,19 +246,16 @@ namespace GeometryFriendsAgents
             {
                 Random random = new Random();
                 int ran = random.Next(2);
-                //if (alwaysCorrectH < 160 && CanMorphUp(y-alwaysCorrectH-35,x,alwaysCorrectW))
                 if (ran == 0)
                 {
                     return Moves.MORPH_UP;
                 }
                 else if(direction == 0)
                 {
-                    //return Moves.MOVE_RIGHT;
                     return Moves.ROLL_RIGHT;
                 }
                 else if(direction == 4)
                 {
-                    //return Moves.MOVE_LEFT;
                     return Moves.ROLL_LEFT;
                 }
 
@@ -292,82 +264,56 @@ namespace GeometryFriendsAgents
             // possible actions for direction upper right and upper left
             if (direction == 7 || direction == 5)
             {
-                //if (alwaysCorrectH < 160 && CanMorphUp(y - alwaysCorrectH - 35, x, alwaysCorrectW))//!RectangleAgent.obstacleOpenSpace[y - alwaysCorrectH - 7, x])
                 if (CircleAgent.obstacleOpenSpace[y - (int)CircleAgent.radius, x])
                 {
-                        Log.LogInformation("Driver - test52");
                     return Moves.JUMP;
                 }
                 else if (direction == 7)
                 {
-                    Log.LogInformation("Driver - test112");
                     return Moves.ROLL_RIGHT;
                 }
                 else if (direction == 5)
                 {
-                    Log.LogInformation("Driver - test102");
                     return Moves.ROLL_LEFT;
                 }
             }
 
-            if (action == 1 && alwaysCorrectH > 102 && direction != 6)
-            {
-                return Moves.MORPH_DOWN;
-            }
-            if (action == 1 && alwaysCorrectH < 98 && CanMorphUp(y-alwaysCorrectH,x,alwaysCorrectW))
-            {
-                return Moves.JUMP;
-            }
-            if (action == 2 && alwaysCorrectH > 52)
-            {
-                return Moves.MORPH_DOWN;
-            }
-            if (action == 3 && direction != 6 && alwaysCorrectH < 194 && CanMorphUp(y - alwaysCorrectH, x, alwaysCorrectW) && !IsDiagonalOrientation(hHalf, h, x, centerY, w) && vY < 5)
-            {
-                return Moves.JUMP;
-            }
-            if(direction == 0 || direction == 7 || direction == 1 )
+            if(direction == 0 || direction == 1 )
             {         
                 if((distance < 110 && vX > 50 && (direction2 != 0) ) || vX > 200 )
                 {
-                    //return Moves.MOVE_LEFT;
-                    return Moves.ROLL_LEFT;
+                    return Moves.ROLL_RIGHT;
                 }
                 else
                 {
                     if(nextNode.getPseudo() && distance < 12 && vX > 2 )
                     {
-                        //return Moves.MOVE_LEFT;
                         return Moves.ROLL_LEFT;
                     }
                     if (nextNode.getPseudo() && distance < 6 && vX < 2 && vX > -2)
                     {
                         return Moves.NO_ACTION;
                     }
-                    //return Moves.MOVE_RIGHT;
                     return Moves.ROLL_RIGHT;
                 }
                 
             }
-            if (direction == 4 || direction == 5 || direction == 3 )
+            if (direction == 4 || direction == 3 )
             {
                 if ((distance < 110 && vX < -50 && (direction2 != 4)) || vX < -200 )
                 {
-                    //return Moves.MOVE_RIGHT;
-                    return Moves.ROLL_RIGHT;
+                    return Moves.ROLL_LEFT;
                 }
                 else
                 {
                     if (nextNode.getPseudo() && distance < 12 && vX < -2)
                     {
-                        //return Moves.MOVE_RIGHT;
                         return Moves.ROLL_RIGHT;
                     }
                     if (nextNode.getPseudo() && distance < 6 && vX < 2 && vX > -2)
                     {
                         return Moves.NO_ACTION;
                     }
-                    //return Moves.MOVE_LEFT;
                     return Moves.ROLL_LEFT;
                 }
             }
@@ -386,47 +332,44 @@ namespace GeometryFriendsAgents
                 {
                     return Moves.ROLL_RIGHT;
                 }
-                /*if (alwaysCorrectH < 194 && CanMorphUp(y-alwaysCorrectH,x,alwaysCorrectW))
-                {              
-                    return Moves.MORPH_UP;
-                }
-                else if (Math.Abs(nextNode.getX() - x) > (alwaysCorrectW / 2))
-                {
-                    if ((x - nextNode.getX()) < 0)
-                    {
-                       // return Moves.MOVE_RIGHT;
-                        return Moves.ROLL_RIGHT;
-                    }
-                    else
-                    {
-                        //return Moves.MOVE_LEFT;
-                        return Moves.ROLL_LEFT;
-                    }
-                }*/
-
             }
-            if ((direction == 2) && nextNode.getLeadsToFallDown() && ((Math.Abs(y - previousNode.getY()) > alwaysCorrectH - 15 && Math.Abs(previousNode.getY() - nextNode.getY()) > 200) || (Math.Abs(y - previousNode.getY()) > alwaysCorrectH - 45 && Math.Abs(previousNode.getY() - nextNode.getY()) <= 200)))
+            if (direction == 2)
             {
-                return Moves.MORPH_DOWN;
+                if(previousDirection == 0 || previousDirection == 1)
+                {
+                    return Moves.ROLL_RIGHT;
+                }
+                if(previousDirection == 3 || previousDirection == 4)
+                {
+                    return Moves.ROLL_LEFT;
+                }
+                Random rnd = new Random();
+                switch (rnd.Next(3))
+                {
+                    case 0:
+                        return Moves.ROLL_LEFT;
+                    case 1:
+                        return Moves.ROLL_RIGHT;
+                    case 2:
+                        return Moves.NO_ACTION;
+                }
             }
-            if ((!previousNode.getPseudo() && direction == 2 && (previousDirection == 0 || previousDirection == 4) && (Math.Abs(y - previousNode.getY()) < 5)) || ((previousDirection == 0 || previousDirection == 4) && !CanMorphUp(y - alwaysCorrectH, x, alwaysCorrectW)))
+            if ((!previousNode.getPseudo() && direction == 2 && (previousDirection == 0 || previousDirection == 4) && (Math.Abs(y - previousNode.getY()) < 5)) || ((previousDirection == 0 || previousDirection == 4)))
             {
                 if (previousDirection == 0 && vX < 40)
                 {
-                    //return Moves.MOVE_RIGHT;
                     return Moves.ROLL_RIGHT;
                 }
                 else if(previousDirection == 4 && vX < -40)
                 {
-                    //return Moves.MOVE_LEFT;
                     return Moves.ROLL_LEFT;
                 }
             }
-            if (previousNode.getLeadsToFallDown() && !previousNode.getPseudo() && direction == 2 || direction == 3 || direction == 1 && CanMorphUp(y - alwaysCorrectH, x, alwaysCorrectW) && (vX > 50 || vX < -50))
+            if (previousNode.getLeadsToFallDown() && !previousNode.getPseudo() && direction == 2 || direction == 3 || direction == 1)
             {
                 if(previousNodeToObstacleDistance() <= 125)
                 {
-                    return Moves.MORPH_UP;
+                    return Moves.JUMP;
                 }
             }
             if (output)
@@ -452,89 +395,6 @@ namespace GeometryFriendsAgents
                 i++;
             }
             return Math.Abs(i * iter);
-        }
-
-        public bool CanMorphUp(int upperY, int xCenter, int w)
-        {
-            int yUpperThreshold = 10;
-            int step = 10;
-            int xStart = xCenter - (w / 2);    
-                    
-            for (int i = 0; i < w; i=i+step)
-            {
-                //if (RectangleAgent.obstacleOpenSpace[upperY - yUpperThreshold, xStart+i])
-                if (CircleAgent.obstacleOpenSpace[upperY - yUpperThreshold, xStart + i])
-                    {
-                    return false;
-                }
-            }
-            //if (RectangleAgent.obstacleOpenSpace[upperY - yUpperThreshold, xStart + w-1])
-            if (CircleAgent.obstacleOpenSpace[upperY - yUpperThreshold, xStart + w - 1])
-            {
-                return false;
-            }
-            return true;
-        }
-
-        public bool IsTwisted(int hHalf, int h, int x, int y, int w)
-        {
-            int index = 1;
-            //while(!RectangleAgent.obstacleOpenSpace[y+index,x])
-            while (!CircleAgent.obstacleOpenSpace[y + index, x])
-                {
-                index++;
-            }
-            if ( !(w >= 98 && w <= 102) && Math.Abs((index*2) - w) <=5)
-            {
-                if (index > 101)
-                {
-                    if (output)
-                    {
-                        Log.LogInformation("Driver - TWISTED false, FALL DOWN, " + w + " " + index);
-                    }
-                    return false;
-                }
-                if (output)
-                {
-                    Log.LogInformation("Driver - TWISTED, " + w + " " + index);
-                }
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool IsDiagonalOrientation(int hHalf, int h, int x, int y, int w)
-        {
-            int index = 1;
-            //while (!RectangleAgent.obstacleOpenSpace[y + index, x])
-            while (!CircleAgent.obstacleOpenSpace[y + index, x])
-            {
-                index++;
-            }
-            if (Math.Abs(hHalf - index) >= 2.5 && Math.Abs((index * 2) - w) > 5)
-            {
-                if(index > 101)
-                {
-                    if (output)
-                    {
-                        Log.LogInformation("Driver - DiagonalOrientation false, FALL DOWN, " + hHalf + " " + index);
-                    }
-                    return false;
-                }
-                if (output)
-                {
-                    Log.LogInformation("Driver - DiagonalOrientation true, " + hHalf + " " + index);
-                }
-                return true;
-            }
-            if (output)
-            {
-                Log.LogInformation("Driver - DiagonalOrientation false, " + hHalf + " " + index);
-            }
-            return false;
         }
 
         public Node GetOppositeFallDownNode(Node nextNode)
@@ -581,7 +441,6 @@ namespace GeometryFriendsAgents
             Log.LogInformation("Driver Subgoal AStar - Subgoal AStar start");
 
             int s = 1;
-            //while (!RectangleAgent.obstacleOpenSpace[centerY + s, x])
             while (!CircleAgent.obstacleOpenSpace[centerY + s, x])
                 {
                 s++;
@@ -601,10 +460,6 @@ namespace GeometryFriendsAgents
                 }
             }
 
-            //RectangleAgent.nodes = this.nodes;
-            //RectangleAgent.CreateEdgesAndAdjacencyMatrix();
-            //this.adjacencyMatrix = RectangleAgent.adjacencyMatrix;
-            //this.directionMap = RectangleAgent.directionMap;
             CircleAgent.nodes = this.nodes;
             CircleAgent.CreateEdgesAndAdjacencyMatrix();
             this.adjacencyMatrix = CircleAgent.adjacencyMatrix;
@@ -626,109 +481,9 @@ namespace GeometryFriendsAgents
 
             return recalcNextNodes("Subgoal AStar", x, y);
         }
-
-        private int UsePermutationAStar(int x, int centerY)
-        {
-            Log.LogInformation("Driver Permutation AStar - Permutation AStar start");
-
-            int s = 1;
-            //while (!RectangleAgent.obstacleOpenSpace[centerY + s, x])
-            while (!CircleAgent.obstacleOpenSpace[centerY + s, x])
-            {
-                s++;
-            }
-            Node square = new Node(x, centerY + s - 1, false);
-            this.nodes[0] = square;
-            int y = square.getY();
-
-            deleteCollectedDiamonds();
-
-            //RectangleAgent.nodes = this.nodes;
-            //RectangleAgent.CreateEdgesAndAdjacencyMatrix();
-            //this.adjacencyMatrix = RectangleAgent.adjacencyMatrix;
-            //this.directionMap = RectangleAgent.directionMap;
-
-            //this.route = RectangleAgent.calcShortestRouteAStarAllPermutations();
-            CircleAgent.nodes = this.nodes;
-            CircleAgent.CreateEdgesAndAdjacencyMatrix();
-            this.adjacencyMatrix = CircleAgent.adjacencyMatrix;
-            this.directionMap = CircleAgent.directionMap;
-
-            this.route = RectangleAgent.calcShortestRouteAStarAllPermutations();
-
-            return recalcNextNodes("Permutation AStar", x, y);
-        }
-
-        private int UseGreedyGoalAStar(int x, int centerY)
-        {
-            Log.LogInformation("Driver Greedy Goal AStar - Greedy Goal AStar start");
-
-            int s = 1;
-            //while (!RectangleAgent.obstacleOpenSpace[centerY + s, x])
-            while (!CircleAgent.obstacleOpenSpace[centerY + s, x])
-            {
-                s++;
-            }
-            Node square = new Node(x, centerY + s - 1, false);
-            this.nodes[0] = square;
-            int y = square.getY();
-
-            deleteCollectedDiamonds();
-
-            //RectangleAgent.nodes = this.nodes;
-            //RectangleAgent.CreateEdgesAndAdjacencyMatrix();
-            //this.adjacencyMatrix = RectangleAgent.adjacencyMatrix;
-            //this.directionMap = RectangleAgent.directionMap;
-
-            //this.route = RectangleAgent.calcShortestRouteAStar();
-            CircleAgent.nodes = this.nodes;
-            CircleAgent.CreateEdgesAndAdjacencyMatrix();
-            this.adjacencyMatrix = CircleAgent.adjacencyMatrix;
-            this.directionMap = CircleAgent.directionMap;
-
-            this.route = CircleAgent.calcShortestRouteAStar();
-
-            return recalcNextNodes("Greedy Goal AStar", x, y);
-        }
-
-        private int UseYHeuristicAStar(int x, int centerY)
-        {
-            Log.LogInformation("Driver Y-Heuristic AStar - Y-Heuristic AStar start");
-
-            int s = 1;
-            while (!RectangleAgent.obstacleOpenSpace[centerY + s, x])
-            {
-                s++;
-            }
-            Node square = new Node(x, centerY + s - 1, false);
-            this.nodes[0] = square;
-            int y = square.getY();
-
-            deleteCollectedDiamonds();
-
-            List<Node> diamondNodes = new List<Node>();
-            for (int n = 0; n < nodes.Count; n++)
-            {
-                if (nodes[n].getDiamond())
-                {
-                    diamondNodes.Add(nodes[n]);
-                }
-            }
-
-            RectangleAgent.nodes = this.nodes;
-            RectangleAgent.CreateEdgesAndAdjacencyMatrix();
-            this.adjacencyMatrix = RectangleAgent.adjacencyMatrix;
-            this.directionMap = RectangleAgent.directionMap;
-
-            diamondNodes = RectangleAgent.calcDiamondOrder(diamondNodes);
-            this.route = RectangleAgent.calcShortestRouteWithDiamondOrderAStar(diamondNodes);
-
-            return recalcNextNodes("Y-Heuristic AStar", x, y);
-        }
-
+        
         private void deleteCollectedDiamonds()
         {
-            //float[] colInfo = RectangleAgent.collectiblesInfo;
             float[] colInfo = CollectibleRepresentation.RepresentationArrayToFloatArray(CircleAgent.colI);
             List<Node> colLeftList = new List<Node>();
             for (int i = 0; i < colInfo.Length; i = i + 2)

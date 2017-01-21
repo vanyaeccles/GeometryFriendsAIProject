@@ -33,21 +33,12 @@ namespace GeometryFriendsAgents
             // Cost from start along best known path until current node
             int gScore = 0;
             // Estimated total cost from start to goal
-            int fScore = gScore; // + HeuristicValue(start,goal);
+            int fScore = gScore;
             //Add start
             //Create SubgoalAStarNode with node index, fScore value, gScore value, cameFrom node and the state of collected diamonds
             SubgoalAStarNode startNode = new SubgoalAStarNode(start, fScore, gScore, null, new List<int>() );
             openList.Add(startNode);
         }
-
-        //returns the euclidean distance between two nodes
-        //private int HeuristicValue(int start,int goal)
-        //{
-        //    Node n1 = RectangleAgent.nodes[start];
-        //    Node n2 = RectangleAgent.nodes[goal];
-        //    int distance = (int)Math.Sqrt(Math.Pow(n1.getX() - n2.getX(), 2) + Math.Pow(n1.getY() - n2.getY(), 2));
-        //    return distance;
-        //}
 
         public Queue<Node> Run()
         {
@@ -91,7 +82,7 @@ namespace GeometryFriendsAgents
                     {
                         int gScore = tentativeGScore;
                         //calc new fScore
-                        int fScore = gScore; // +HeuristicValue(neighbor, goal);
+                        int fScore = gScore;
                         //if neighbor is not in openList, add new node
                         if (neighborInList == null)
                         {

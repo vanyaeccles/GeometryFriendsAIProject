@@ -333,10 +333,10 @@ namespace GeometryFriendsAgents
         //Manager gets this action from agent
         public override Moves GetAction()
         {
-            //if (currentAction == Moves.NO_ACTION)
-            //{
-            //    return RandomAction();
-            //}
+            if (currentAction == Moves.NO_ACTION)
+            {
+                return RandomAction();
+            }
             return currentAction;
         }
 
@@ -399,10 +399,6 @@ namespace GeometryFriendsAgents
             return agentName;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public static Queue<Node> calcShortestRouteAStar()
         {
             //All diamond nodes
@@ -428,10 +424,6 @@ namespace GeometryFriendsAgents
                     astar = new AStar(startIndex, diamondIndex[i]);
                     queueListTemp.Add(astar.Run());
                     queueDistanceListTemp.Add(astar.GetCompleteDistance());
-                    //if (output)
-                    //{
-                    //   Log.LogInformation("Greedy Goal AStar - Next Route: from " + startIndex + " to " + diamondIndex[i] + " distance " + astar.GetCompleteDistance());
-                    //}
                 }
                 //search shortest
                 int shortest = queueDistanceListTemp[0];
@@ -448,19 +440,11 @@ namespace GeometryFriendsAgents
                 {
                     int shortestIndex = queueDistanceListTemp.IndexOf(shortest);
                     queueList.Add(queueListTemp[shortestIndex]);
-                    //if (output)
-                    //{
-                    //    Log.LogInformation("Greedy Goal AStar - Shortest route: from " + startIndex + " to " + diamondIndex[shortestIndex] + " distance " + shortest);
-                    //}
                     startIndex = diamondIndex[shortestIndex];
                     diamondIndex.Remove(startIndex);
                 }
                 else
                 {
-                    //if (output)
-                    //{
-                    //    Log.LogInformation("Greedy Goal AStar - No more possible routes");
-                    //}
                     break;
                 }
             }
@@ -534,10 +518,7 @@ namespace GeometryFriendsAgents
                     obstaclePixelCounter++;
                 }
             }
-            /*if (abstractionOutput)
-            {
-                Log.LogInformation("SQUARE - obstaclePixelCounter - borders - " + obstaclePixelCounter);
-            }*/
+
             //Fill in obstacles
             for (int i = 0; i < obstaclesInfo.Length; i = i + 4)
             {
@@ -547,10 +528,7 @@ namespace GeometryFriendsAgents
                 int w = (int)obstaclesInfo[i + 3];
                 int upperLeftX = x - (w / 2);
                 int upperLeftY = y - (h / 2);
-                //if (abstractionOutput)
-                //{
-                //    Log.LogInformation("SQUARE - obstaclePixelCounter - ULX " + upperLeftX + " - ULY " + upperLeftY + " - h " + h + " - w " + w);
-                //}
+
                 for (int j = upperLeftY; j < upperLeftY + h; j++)
                 {
                     for (int k = upperLeftX; k < upperLeftX + w; k++)
@@ -560,10 +538,6 @@ namespace GeometryFriendsAgents
                     }
                 }
             }
-            //if (abstractionOutput)
-            //{
-            //    Log.LogInformation("SQUARE - obstaclePixelCounter - borders and obstacles - " + obstaclePixelCounter);
-            //}
 
             //Fill in circle specific obstacles
             for (int i = 0; i < circlePlatformsInfo.Length; i = i + 4)
@@ -574,10 +548,7 @@ namespace GeometryFriendsAgents
                 int w = (int)circlePlatformsInfo[i + 3];
                 int upperLeftX = x - (w / 2);
                 int upperLeftY = y - (h / 2);
-                //if (abstractionOutput)
-                //{
-                //    Log.LogInformation("SQUARE - obstaclePixelCounter - ULX " + upperLeftX + " - ULY " + upperLeftY + " - h " + h + " - w " + w);
-                //}
+
                 for (int j = upperLeftY; j < upperLeftY + h; j++)
                 {
                     for (int k = upperLeftX; k < upperLeftX + w; k++)
@@ -809,16 +780,7 @@ namespace GeometryFriendsAgents
                     nodes.Add(node2);
                 }
             }
-            /*if (abstractionOutput)
-            {
-                //output
-                int index = 0;
-                foreach (Node n in nodes)
-                {
-                    Log.LogInformation("SQUARE - Nodes - " + index + " - " + n);
-                    index++;
-                }
-            }*/
+
             Log.LogInformation("SQUARE - Number of nodes: " + nodes.Count);
             Log.LogInformation("SQUARE - Number of diamonds: " + collectiblesInfo.Length / 2);
         }
@@ -827,10 +789,7 @@ namespace GeometryFriendsAgents
         {
             int deltaX = n1.getX() - n2.getX();
             int deltaY = n1.getY() - n2.getY();
-            //if (abstractionOutput)
-            //{
-                Log.LogInformation("DX: " + deltaX + " - DY: " + deltaY);
-            //}
+
             int edge = 0;
             int direction = -1;
             int distance = -1;
@@ -874,45 +833,37 @@ namespace GeometryFriendsAgents
                 direction = (int)Direction.RightUp;
                 distance = (int)Math.Sqrt(Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2));
             }
-            //if (abstractionOutput)
-            //{
-                Log.LogInformation("Direction: " + direction);
-            //}
 
-            //if (!((deltaY >= 200 && deltaX == 0) || (deltaY >= 50 && deltaX < 0) || (deltaY >= 50 && deltaX > 0) || (direction == 6 && deltaY < 200 && deltaY > 75 && deltaX == 0 && !n2.getDiamond())))
+
+            //Square    
+            bool obstacle = checkSquareSize(nSquareSize, direction, n1, n2);
+
+            //if obstacle false ok else horizontal
+            if (!obstacle)
             {
-
-                //bool[,] obstacleOpenSpaceCopy = (bool[,])obstacleOpenSpace.Clone();
-
-                //Square    
-                bool obstacle = checkSquareSize(nSquareSize, direction, n1, n2);
-
-                //if obstacle false ok else horizontal
-                if (!obstacle)
-                {
-                    return new int[] { 1, direction, distance };
-                }
-                else
-                {
-                    obstacle = checkSquareSize(hSquareSize, direction, n1, n2);
-                }
-
-                //if obstacle false ok else vertical
-                if (!obstacle)
-                {
-                    return new int[] { 2, direction, distance };
-                }
-                else
-                {
-                    obstacle = checkSquareSize(vSquareSize, direction, n1, n2);
-                }
-
-                //if obstacle false ok else nothing
-                if (!obstacle)
-                {
-                    return new int[] { 3, direction, distance };
-                }
+                return new int[] { 1, direction, distance };
             }
+            else
+            {
+                obstacle = checkSquareSize(hSquareSize, direction, n1, n2);
+            }
+
+            //if obstacle false ok else vertical
+            if (!obstacle)
+            {
+                return new int[] { 2, direction, distance };
+            }
+            else
+            {
+                obstacle = checkSquareSize(vSquareSize, direction, n1, n2);
+            }
+
+            //if obstacle false ok else nothing
+            if (!obstacle)
+            {
+                return new int[] { 3, direction, distance };
+            }
+            
 
             return new int[] { edge, direction, distance };
         }
@@ -951,134 +902,6 @@ namespace GeometryFriendsAgents
                     //}
                 }
             }
-
-            //delete diagonal lines between two fall down nodes to prevent to get stuck in a gap
-            /*
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                for (int j = 0; j < nodes.Count; j++)
-                {
-                    if (adjacencyMatrix[i, j] != 0)
-                    {
-                        if (nodes[i].getLeadsToFallDown() && nodes[j].getLeadsToFallDown() && (directionMap[i, j] == 1 || directionMap[i, j] == 3) && directDistanceMap[i, j] < 150)
-                        {
-                            adjacencyMatrix[i, j] = 0;
-                        }
-                    }
-                }
-            }*/
-
-            //create edge for diamonds, which only can be reached by falling down
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                if (nodes[i].getDiamond())
-                {
-                    //From any node to i
-                    bool unreachable = true;
-                    for (int j = 0; j < nodes.Count; j++)
-                    {
-                        if (j == i)
-                        {
-                            continue;
-                        }
-                        if (adjacencyMatrix[j, i] != 0)
-                        {
-                            unreachable = false;
-                            break;
-                        }
-                    }
-                    //unreachable diamond found
-                    /*
-                    if (unreachable)
-                    {
-                        nodes[i].setDiamond(false);
-                        //check edges as normal node
-                        for (int k = 0; k < nodes.Count; k++)
-                        {
-                            if (k == i)
-                            {
-                                continue;
-                            }
-                            int[] actionDirectionDistance = CheckEdge(nodes[k], nodes[i]);
-                            adjacencyMatrix[k, i] = actionDirectionDistance[0];
-                            directionMap[k, i] = actionDirectionDistance[1];
-                            directDistanceMap[k, i] = actionDirectionDistance[2];
-                        }
-                        nodes[i].setDiamond(true);
-                    }*/
-
-                    //From i to other nodes
-                    unreachable = true;
-                    for (int j = 0; j < nodes.Count; j++)
-                    {
-                        if (j == i)
-                        {
-                            continue;
-                        }
-                        if (adjacencyMatrix[i, j] != 0)
-                        {
-                            unreachable = false;
-                            break;
-                        }
-                    }
-                    //unreachable diamond found
-                    /*
-                    if (unreachable)
-                    {
-                        nodes[i].setDiamond(false);
-                        //check edges as normal node
-                        for (int k = 0; k < nodes.Count; k++)
-                        {
-                            if (k == i)
-                            {
-                                continue;
-                            }
-                            int[] actionDirectionDistance = CheckEdge(nodes[i], nodes[k]);
-                            adjacencyMatrix[i, k] = actionDirectionDistance[0];
-                            directionMap[i, k] = actionDirectionDistance[1];
-                            directDistanceMap[i, k] = actionDirectionDistance[2];
-                        }
-                        nodes[i].setDiamond(true);
-                    }*/
-                }
-            }
-
-            //if (abstractionOutput)
-            //{
-                //Debug output
-                Log.LogInformation("Edges: ");
-                for (int i = 0; i < adjacencyMatrix.GetLength(0); i++)
-                {
-                    for (int k = 0; k < adjacencyMatrix.GetLength(1); k++)
-                    {
-                        System.Diagnostics.Debug.Write(adjacencyMatrix[i, k] + " ");
-                    }
-
-                    Log.LogInformation("");
-                }
-                //Debug output
-                Log.LogInformation("Directions: ");
-                for (int i = 0; i < directionMap.GetLength(0); i++)
-                {
-                    for (int k = 0; k < directionMap.GetLength(1); k++)
-                    {
-                        System.Diagnostics.Debug.Write(directionMap[i, k] + " ");
-                    }
-
-                    Log.LogInformation("");
-                }
-                //Debug output
-                Log.LogInformation("Distances: ");
-                for (int i = 0; i < directDistanceMap.GetLength(0); i++)
-                {
-                    for (int k = 0; k < directDistanceMap.GetLength(1); k++)
-                    {
-                        System.Diagnostics.Debug.Write(directDistanceMap[i, k] + " ");
-                    }
-
-                    Log.LogInformation("");
-                }
-            //}
         }
 
         public static bool checkSquareSize(int[] nSquareSize, int direction, Node n1, Node n2)
@@ -1287,10 +1110,6 @@ namespace GeometryFriendsAgents
                 {
                     return true;
                 }
-            //    if (abstractionOutput)
-             //   {
-                    Log.LogInformation(nSquareSize + "LeftDown: N1: " + n1 + " X: " + x + " Y: " + y);
-             //   }
             }
             else
             {
