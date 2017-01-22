@@ -1,4 +1,4 @@
-﻿
+﻿//ADAPTED FROM SUBGOAL A* CODE WRITTEN BY DANIEL FISCHER
 using GeometryFriends;
 using GeometryFriends.AI;
 using GeometryFriends.AI.Interfaces;

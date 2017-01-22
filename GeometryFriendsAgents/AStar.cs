@@ -1,4 +1,5 @@
-﻿using GeometryFriends;
+﻿//ADAPTED FROM SUBGOAL A* CODE WRITTEN BY DANIEL FISCHER
+using GeometryFriends;
 using System;
 using System.Collections.Generic;
 
