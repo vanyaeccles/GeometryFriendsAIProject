@@ -895,11 +895,7 @@ namespace GeometryFriendsAgents
                     {
                         nodes[i].setLeadsToFallDown(true);
                     }
-                    //adjacencyMatrix[i, j] = CheckEdge(n1, n2);
-                    //if (abstractionOutput)
-                    //{
-                        Log.LogInformation("Edge: " + adjacencyMatrix[i, j]);
-                    //}
+                    Log.LogInformation("Edge: " + adjacencyMatrix[i, j]);
                 }
             }
         }
@@ -913,10 +909,8 @@ namespace GeometryFriendsAgents
 
             int x = Math.Abs(x1 - x0);
             int y = Math.Abs(y1 - y0);
-           // if (abstractionOutput)
-         //   {
-                Log.LogInformation("X: " + x + "Y: " + y);
-          //  }
+
+            Log.LogInformation("X: " + x + "Y: " + y);
 
             if (direction == (int)Direction.Right)
             {
@@ -937,13 +931,11 @@ namespace GeometryFriendsAgents
                         distanceWithoutSurface++;
                         if (distanceWithoutSurface > 200 || (distanceWithoutSurface + 5) >= Math.Abs(n1.getX() - n2.getX()))
                         {
-                            //Log.LogInformation("No edge because of no surface true - " + distanceWithoutSurface + " - " + n1 + " - " + n2);
                             return true;
                         }
                     }
                     else
                     {
-                        //Log.LogInformation("No surface false - " + distanceWithoutSurface + " - " + n1 + " - " + n2);
                         distanceWithoutSurface = 0;
                     }
                 }
@@ -967,13 +959,11 @@ namespace GeometryFriendsAgents
                         distanceWithoutSurface++;
                         if (distanceWithoutSurface > 200 || (distanceWithoutSurface + 5) >= Math.Abs(n1.getX() - n2.getX()))
                         {
-                            //Log.LogInformation("No edge because of no surface true - " + distanceWithoutSurface + " - " + n1 + " - " + n2);
                             return true;
                         }
                     }
                     else
                     {
-                        //Log.LogInformation("No surface false - " + distanceWithoutSurface + " - " + n1 + " - " + n2);
                         distanceWithoutSurface = 0;
                     }
                 }
@@ -993,7 +983,6 @@ namespace GeometryFriendsAgents
                     {
                         for (int j = 0; j < nSquareSize[0]; j++)
                         {
-                            //Log.LogInformation("Output: " + (n1.getY() - i) + "output2: " + (n1.getX() + j));
                             if (obstacleOpenSpace[n1.getY() + i, n1.getX() + j])
                             {
                                 toRight = true;
@@ -1067,13 +1056,10 @@ namespace GeometryFriendsAgents
                     return true;
                 }
             }
-            else if (direction == (int)Direction.RightDown) //  || direction == (int)Direction.LeftDown || direction == (int)Direction.LeftUp || direction == (int)Direction.RightUp)
+            else if (direction == (int)Direction.RightDown)
             {
-              //  if (abstractionOutput)
-              //  {
-                    Log.LogInformation(nSquareSize + "RightDown: N1: " + n1 + " X: " + x + " Y: " + y);
-                    Log.LogInformation(nSquareSize + "RightDown: N2: " + n2);
-              //  }
+                Log.LogInformation(nSquareSize + "RightDown: N1: " + n1 + " X: " + x + " Y: " + y);
+                Log.LogInformation(nSquareSize + "RightDown: N2: " + n2);
 
                 List<int[]> pixels = PixelLine(x0, y0, x1, y1);
                 if (pixels == null)
@@ -1086,19 +1072,9 @@ namespace GeometryFriendsAgents
                 {
                     return true;
                 }
-              //  if (abstractionOutput)
-              //  {
-                    Log.LogInformation(nSquareSize + "RightDown: N1: " + n1 + " X: " + x + " Y: " + y);
-              //  }
             }
             else if (direction == (int)Direction.LeftDown)
             {
-             //   if (abstractionOutput)
-             //   {
-                    Log.LogInformation(nSquareSize + "LeftDown: N1: " + n1 + " X: " + x + " Y: " + y);
-                    Log.LogInformation(nSquareSize + "LeftDown: N2: " + n2);
-             //   }
-
                 List<int[]> pixels = PixelLine(x0, y0, x1, y1);
                 if (pixels == null)
                 {
