@@ -1,4 +1,5 @@
-﻿using System;
+﻿//ADAPTED FROM SUBGOAL A* CODE WRITTEN BY DANIEL FISCHER
+using System;
 using System.Collections.Generic;
 
 namespace GeometryFriendsAgents

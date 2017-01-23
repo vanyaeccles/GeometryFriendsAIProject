@@ -127,7 +127,7 @@ namespace GeometryFriendsAgents
                 distanceList = new List<float>();
             }
 
-            if (((distance - 3) <= (alwaysCorrectW / 2) && !nextNode.getPseudo()) || (direction == 6 && distance <= alwaysCorrectH) || ((direction == 2 || direction == 1 || direction == 3) && (nextNode.getY() - y) < 4 && distance < 3 * alwaysCorrectW) || (nextNode.getPseudo() && (distance - 3 < 3)))// (direction == 2)
+            if (((distance - 3) <= (alwaysCorrectW / 2) && !nextNode.getPseudo()) || (direction == 6 && distance <= alwaysCorrectH) || ((direction == 2 || direction == 1 || direction == 3) && (nextNode.getY() - y) < 4 && distance < 3 * alwaysCorrectW) || (nextNode.getPseudo() && (distance - 3 < 3)))
             {
                 distanceList = new List<float>();
                 if (output)
@@ -390,7 +390,6 @@ namespace GeometryFriendsAgents
             {
                 iter = iter * -1;
             }
-            //while(!RectangleAgent.obstacleOpenSpace[y,x+(i*iter)])
             while (!CircleAgent.obstacleOpenSpace[y, x + (i * iter)])
             {
                 i++;
