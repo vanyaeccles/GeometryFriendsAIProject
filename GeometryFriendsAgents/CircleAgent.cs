@@ -152,9 +152,6 @@ namespace GeometryFriendsAgents
             //moveStepSizeReSolve = moveStepSize % 3;
             if (moveStepSize == 0)
             {
-
-            //    if (moveStepSize == 0)
-            //    {
                 int i = ((int)circleInfo.X);
                 int j = ((int)circleInfo.Y);
 
@@ -202,27 +199,7 @@ namespace GeometryFriendsAgents
                         Debug.Print(line);
                     }
                 driver.updateSolution(solution);
-                //}
-
-
-
                 currentAction = driver.getAction(circleInfo);
-
-
-
-                
-                //if (currentAction == Moves.MOVE_LEFT)
-                //{
-                //    currentAction = Moves.ROLL_LEFT;
-                //}
-                //else if (currentAction == Moves.MOVE_RIGHT)
-                //{
-                //    currentAction = Moves.ROLL_RIGHT;
-                //}
-                //else if (currentAction == Moves.JUMP)
-                //{
-                //    currentAction = Moves.JUMP;
-                //}
             }
             moveStepSize++;
 
