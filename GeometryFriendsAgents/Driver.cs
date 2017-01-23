@@ -1,4 +1,5 @@
-﻿using GeometryFriends;
+﻿//PARTIALLY ADAPTED FROM DRIVER CODE WRITTEN BY DANIEL FISCHER
+using GeometryFriends;
 using GeometryFriends.AI;
 using System;
 using System.Collections.Generic;
@@ -209,41 +210,7 @@ namespace GeometryFriendsAgents
             {
                 return Moves.NO_ACTION;
             }
-
-            //switch (direction)
-            //{
-            //    case 0:
-            //        return Moves.ROLL_LEFT;
-            //        break;
-            //    case 1:
-            //        return Moves.ROLL_LEFT;
-            //        break;
-            //    case 2:
-            //        return Moves.JUMP;
-            //        break;
-            //    case 3:
-            //        return Moves.ROLL_RIGHT;
-            //        break;
-            //    case 4:
-            //        return Moves.ROLL_RIGHT;
-            //        break;
-            //    case 5:
-            //        return Moves.ROLL_RIGHT;
-            //        break;
-            //    case 6:
-            //        return Moves.NO_ACTION;
-            //        break;
-            //    case 7:
-            //        return Moves.ROLL_LEFT;
-            //        break;
-
-            //}
-
-
         }
-
-        
-       
     }
 }
  

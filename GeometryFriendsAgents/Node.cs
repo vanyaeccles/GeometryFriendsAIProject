@@ -1,4 +1,5 @@
-﻿using System;
+﻿//The A* Algorithm used in the code below was adapted from the tutorial found at http://blog.two-cats.com/2014/06/a-star-example/, which details the basic principles that underline A*.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
